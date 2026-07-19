@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Custom transitions and scrollbar conforming to dark slate terminal */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #111111;
+}
+::-webkit-scrollbar-thumb {
+  background: #333333;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #E53935;
+}
+
+::selection {
+  background: #E53935;
+  color: #ffffff;
+}
+
+.glow-crimson:hover {
+  box-shadow: 0 0 12px rgba(229, 57, 133, 0.25);
+}
+
+.glow-amber:hover {
+  box-shadow: 0 0 12px rgba(214, 154, 78, 0.25);
+}
+
+/* D3 node animation transitions */
+.d3-node {
+  transition: transform 0.1s ease-out;
+}
+

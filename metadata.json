@@ -1,0 +1,6 @@
+{
+  "name": "KSP Intelligent Crime Analytics Platform",
+  "description": "Intelligent Conversational AI & Multi-dimensional Crime Analytics Platform for Karnataka State Police.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
