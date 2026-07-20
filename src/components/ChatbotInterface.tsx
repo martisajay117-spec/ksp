@@ -12,9 +12,10 @@ interface Message {
 interface ChatbotInterfaceProps {
   selectedNode: POLEEntity | null;
   role: string;
+  selectedCaseId: string;
 }
 
-export default function ChatbotInterface({ selectedNode, role }: ChatbotInterfaceProps) {
+export default function ChatbotInterface({ selectedNode, role, selectedCaseId }: ChatbotInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: "bot",
@@ -146,7 +147,8 @@ export default function ChatbotInterface({ selectedNode, role }: ChatbotInterfac
           messages: [...messages, newMsg].map(m => ({ sender: m.sender, content: m.content })),
           selectedNode: selectedNode,
           language: language,
-          role: role
+          role: role,
+          selectedCaseId: selectedCaseId
         })
       });
 

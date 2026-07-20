@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { 
   Network, TrendingUp, Users, Coins, Zap, Shield, 
   HelpCircle, RefreshCw, FileText, Search, BookOpen, Clock, AlertTriangle, Play, Sparkles,
-  Maximize2, Minimize2
+  Maximize2, Minimize2, Compass, Sun, Moon, Lock, Mail, ChevronRight
 } from "lucide-react";
 
 // Components
@@ -14,10 +14,12 @@ import OffenderProfiling from "./components/OffenderProfiling";
 import FinancialCrime from "./components/FinancialCrime";
 import ForecastingAlerts from "./components/ForecastingAlerts";
 import AccessGovernance from "./components/AccessGovernance";
+import CaseInvestigation from "./components/CaseInvestigation";
 
 // Types & Mock Data
 import { POLEEntity, POLELink, AuditLog, HistoricalCase } from "./types";
 import { mockPOLEData } from "./data/mockData";
+import { casesData } from "./data/casesData";
 
 const TYPE_COLOR: Record<string, string> = {
   Person: '#E53935',
@@ -28,15 +30,27 @@ const TYPE_COLOR: Record<string, string> = {
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<"graph" | "trends" | "sociology" | "offender" | "financial" | "forecasting" | "governance">("graph");
+  const [activeTab, setActiveTab] = useState<"graph" | "investigation" | "trends" | "sociology" | "offender" | "financial" | "forecasting" | "governance">("graph");
   const [selectedNode, setSelectedNode] = useState<POLEEntity | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [role, setRole] = useState<string>("Investigator");
-  const [docketInfo, setDocketInfo] = useState<any>({
-    docketId: "KSP-2026-JYG-0124",
-    status: "Active Investigation",
-    district: "Bengaluru South Div"
-  });
+  const [selectedCaseId, setSelectedCaseId] = useState<string>("jayanagar");
+  
+  // Dynamically calculate docketInfo based on selectedCaseId from casesData
+  const currentCase = casesData[selectedCaseId] || casesData.jayanagar;
+  const docketInfo = {
+    docketId: currentCase.docketId,
+    status: currentCase.status,
+    district: currentCase.district
+  };
+
+  // Authentication & Theme States
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [loginEmail, setLoginEmail] = useState<string>("martisajay117@gmail.com");
+  const [loginPassword, setLoginPassword] = useState<string>("");
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [tempTheme, setTempTheme] = useState<"dark" | "light">("dark");
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   // Graph Algorithm States
   const [activeAlgo, setActiveAlgo] = useState<"core" | "between" | "community" | null>(null);
@@ -155,8 +169,179 @@ export default function App() {
     return matchesType && matchesSearch;
   }).length;
 
+  if (!isLoggedIn) {
+    return (
+      <div className="h-screen w-screen bg-[#0D0D0D] flex items-center justify-center p-4 font-sans select-none overflow-hidden relative">
+        {/* Animated matrix scanline overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] pointer-events-none opacity-40"></div>
+        
+        {/* Background ambient red circle glow */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#E53935]/5 blur-[120px] pointer-events-none"></div>
+
+        {/* Access Gateway Card */}
+        <div className="w-full max-w-md bg-[#161616] border-2 border-[#E53935]/40 rounded-lg p-8 shadow-2xl relative z-10 space-y-6">
+          <div className="text-center space-y-2">
+            <div className="inline-flex w-12 h-12 rounded bg-[#111111] border-2 border-[#E53935] items-center justify-center font-bold text-xl text-[#E53935] font-mono shadow-inner">
+              KSP
+            </div>
+            <div>
+              <span className="text-[10px] font-mono font-bold text-[#E53935] tracking-[0.2em] uppercase block">
+                MHA Secure Access Portal
+              </span>
+              <h2 className="text-base font-bold text-[#E0E0E0] uppercase tracking-wider mt-1">
+                Karnataka State Police Terminal
+              </h2>
+              <p className="text-[10px] font-mono text-[#888888]">
+                Centralized POLE Docket & Auditing Environment
+              </p>
+            </div>
+          </div>
+
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!loginEmail.trim() || !loginPassword.trim()) {
+                setLoginError("Registered Email and Security Password are required.");
+                return;
+              }
+              // Simulate credential verification
+              setLoginError(null);
+              setTheme(tempTheme);
+              setIsLoggedIn(true);
+            }}
+            className="space-y-4"
+          >
+            {loginError && (
+              <div className="bg-[#E53935]/10 border border-[#E53935]/30 rounded p-3 text-[11px] font-mono text-[#E53935] flex items-center gap-2">
+                <AlertTriangle size={14} className="shrink-0" />
+                <span>{loginError}</span>
+              </div>
+            )}
+
+            {/* Stage 1: Credentials */}
+            <div className="space-y-3.5">
+              <span className="text-[10px] font-mono font-bold text-[#888888] uppercase tracking-wider block border-b border-[#333333] pb-1">
+                01. SECURE ACCESS CREDENTIALS
+              </span>
+              
+              <div className="space-y-2.5">
+                <div className="relative">
+                  <Mail className="absolute left-3 top-2.5 h-4 w-4 text-[#888888]" />
+                  <input
+                    type="email"
+                    placeholder="Registered Operator Email"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    className="w-full bg-[#111111] border border-[#333333] focus:border-[#E53935] rounded pl-10 pr-3 py-2 text-xs font-mono text-[#E0E0E0] outline-none transition-colors"
+                  />
+                </div>
+
+                <div className="relative">
+                  <Lock className="absolute left-3 top-2.5 h-4 w-4 text-[#888888]" />
+                  <input
+                    type="password"
+                    placeholder="Terminal Security Password"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    className="w-full bg-[#111111] border border-[#333333] focus:border-[#E53935] rounded pl-10 pr-3 py-2 text-xs font-mono text-[#E0E0E0] outline-none transition-colors"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Stage 2: Theme selection */}
+            <div className="space-y-3 pt-2">
+              <span className="text-[10px] font-mono font-bold text-[#888888] uppercase tracking-wider block border-b border-[#333333] pb-1">
+                02. TERMINAL VISUAL ENVIRONMENT
+              </span>
+              
+              <div className="grid grid-cols-2 gap-3">
+                {/* Dark option */}
+                <button
+                  type="button"
+                  onClick={() => setTempTheme("dark")}
+                  className={`p-3 rounded border text-left flex flex-col justify-between transition-all cursor-pointer ${
+                    tempTheme === "dark" 
+                      ? "bg-[#E53935]/10 border-[#E53935] text-white" 
+                      : "bg-[#111111] border-[#333333] text-[#888888] hover:border-[#555555]"
+                  }`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <Moon size={15} className={tempTheme === "dark" ? "text-[#E53935]" : "text-[#888888]"} />
+                    <span className={`w-2 h-2 rounded-full ${tempTheme === "dark" ? "bg-[#E53935]" : "bg-transparent"}`}></span>
+                  </div>
+                  <div className="mt-3">
+                    <span className="text-xs font-bold block">Dark Terminal</span>
+                    <span className="text-[9px] text-[#888888] mt-0.5 block font-mono">Recommended night theme</span>
+                  </div>
+                </button>
+
+                {/* Light option */}
+                <button
+                  type="button"
+                  onClick={() => setTempTheme("light")}
+                  className={`p-3 rounded border text-left flex flex-col justify-between transition-all cursor-pointer ${
+                    tempTheme === "light" 
+                      ? "bg-[#D69A4E]/10 border-[#D69A4E] text-white" 
+                      : "bg-[#111111] border-[#333333] text-[#888888] hover:border-[#555555]"
+                  }`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <Sun size={15} className={tempTheme === "light" ? "text-[#D69A4E]" : "text-[#888888]"} />
+                    <span className={`w-2 h-2 rounded-full ${tempTheme === "light" ? "bg-[#D69A4E]" : "bg-transparent"}`}></span>
+                  </div>
+                  <div className="mt-3">
+                    <span className="text-xs font-bold block">Light Tactical</span>
+                    <span className="text-[9px] text-[#888888] mt-0.5 block font-mono">High contrast sunlight view</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Stage 3: Case selection */}
+            <div className="space-y-3 pt-4">
+              <span className="text-[10px] font-mono font-bold text-[#888888] uppercase tracking-wider block border-b border-[#333333] pb-1">
+                03. ACTIVE CASE TARGET
+              </span>
+              
+              <div className="relative">
+                <Compass className="absolute left-3 top-2.5 h-4 w-4 text-[#E53935]" />
+                <select
+                  value={selectedCaseId}
+                  onChange={(e) => setSelectedCaseId(e.target.value)}
+                  className="w-full bg-[#111111] border border-[#333333] focus:border-[#E53935] rounded pl-10 pr-3 py-2 text-xs font-mono text-[#E0E0E0] outline-none transition-colors cursor-pointer appearance-none"
+                >
+                  {Object.values(casesData).map((c) => (
+                    <option key={c.id} value={c.id}>
+                      🚨 [{c.status.toUpperCase()}] {c.title}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
+                  <ChevronRight size={14} className="rotate-90 text-[#888888]" />
+                </div>
+              </div>
+            </div>
+
+            {/* Launch button */}
+            <button
+              type="submit"
+              className="w-full bg-[#E53935] hover:bg-[#c62828] text-white font-mono font-bold text-xs uppercase tracking-wider py-2.5 rounded transition-colors shadow-lg shadow-[#E53935]/25 flex items-center justify-center gap-2 cursor-pointer mt-6"
+            >
+              <Shield size={14} /> Establish Secure Connection
+            </button>
+          </form>
+
+          <div className="text-center font-mono text-[9px] text-[#555555]">
+            Authorized Access Only · IP Logged · Karnataka State IT Act
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-screen bg-[#111111] text-[#E0E0E0] font-sans flex flex-col antialiased overflow-hidden">
+    <div className={`h-screen font-sans flex flex-col antialiased overflow-hidden ${theme === 'light' ? 'light-theme bg-[#F8FAFC] text-[#0F172A]' : 'bg-[#111111] text-[#E0E0E0]'}`}>
       
       {/* Top Banner Header */}
       <header className="bg-[#111111] border-b-2 border-[#333333] px-8 py-4 flex flex-wrap justify-between items-center gap-4">
@@ -174,6 +359,21 @@ export default function App() {
         </div>
 
         <div className="flex flex-wrap lg:flex-nowrap items-center justify-between lg:justify-end gap-4 text-xs font-mono w-full lg:w-auto">
+          {/* Theme Quick Selector */}
+          <div className="flex items-center gap-2 bg-[#1A1A1A] border border-[#333333] rounded px-2.5 py-0.5">
+            <span className="text-[9px] text-[#888888] font-mono uppercase tracking-wider">Theme:</span>
+            <button 
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="px-2 py-0.5 text-[9px] font-mono rounded-sm transition-all cursor-pointer text-[#888888] hover:text-[#E53935] flex items-center gap-1.5 font-bold uppercase"
+              title="Toggle Light/Dark Theme"
+            >
+              {theme === "dark" ? <Moon size={11} className="text-[#9884AC]" /> : <Sun size={11} className="text-[#D69A4E]" />}
+              <span>{theme}</span>
+            </button>
+          </div>
+
+          <div className="h-8 w-px bg-[#333333]"></div>
+
           {/* Workspace Layout Settings */}
           <div className="flex items-center gap-2 bg-[#1A1A1A] border border-[#333333] rounded px-2 py-0.5">
             <span className="text-[9px] text-[#888888] font-mono uppercase tracking-wider pl-1">Sidebar:</span>
@@ -269,6 +469,7 @@ export default function App() {
           <div className="flex gap-1.5 overflow-x-auto pb-1 border-b border-[#333333] no-scrollbar select-none">
             {[
               { id: "graph", label: "POLE Link Network", icon: <Network size={14} /> },
+              { id: "investigation", label: "Case Investigation", icon: <Compass size={14} /> },
               { id: "trends", label: "Pattern & Hotspots", icon: <TrendingUp size={14} /> },
               { id: "sociology", label: "Demographic Insights", icon: <Users size={14} /> },
               { id: "offender", label: "Offender Profiling", icon: <Clock size={14} /> },
@@ -415,6 +616,20 @@ export default function App() {
 
                 </div>
               </div>
+            )}
+            
+            {activeTab === "investigation" && (
+              <CaseInvestigation 
+                selectedCaseId={selectedCaseId}
+                onChangeCaseId={(caseId) => setSelectedCaseId(caseId)}
+                onFocusNode={(nodeId) => {
+                  const n = mockPOLEData.nodes.find(node => node.id === nodeId);
+                  if (n) {
+                    setSelectedNode(n as any);
+                    setActiveTab("graph");
+                  }
+                }} 
+              />
             )}
             
             {activeTab === "trends" && <TrendsAnalytics />}
@@ -587,7 +802,7 @@ export default function App() {
           <div className={`flex-1 min-h-0 flex flex-col overflow-hidden ${
             splitRatio === "inspectorOnly" ? "hidden" : ""
           }`}>
-            <ChatbotInterface selectedNode={selectedNode} role={role} />
+            <ChatbotInterface selectedNode={selectedNode} role={role} selectedCaseId={selectedCaseId} />
           </div>
 
           {/* Quick restore bar if Conversational Intelbot is hidden */}

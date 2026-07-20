@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
 import { createServer as createViteServer } from "vite";
 import { mockPOLEData, historicalCases, sociologicalStats } from "./src/data/mockData";
+import { casesData } from "./src/data/casesData";
 
 // Load environment variables
 dotenv.config();
