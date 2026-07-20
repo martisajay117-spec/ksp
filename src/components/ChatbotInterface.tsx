@@ -13,9 +13,11 @@ interface ChatbotInterfaceProps {
   selectedNode: POLEEntity | null;
   role: string;
   selectedCaseId: string;
+  language: "English" | "Kannada";
+  setLanguage: (lang: "English" | "Kannada") => void;
 }
 
-export default function ChatbotInterface({ selectedNode, role, selectedCaseId }: ChatbotInterfaceProps) {
+export default function ChatbotInterface({ selectedNode, role, selectedCaseId, language, setLanguage }: ChatbotInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: "bot",
@@ -24,7 +26,6 @@ export default function ChatbotInterface({ selectedNode, role, selectedCaseId }:
     }
   ]);
   const [inputValue, setInputValue] = useState("");
-  const [language, setLanguage] = useState<"English" | "Kannada">("English");
   const [isListening, setIsListening] = useState(false);
   const [isTtsActive, setIsTtsActive] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -40,6 +41,24 @@ export default function ChatbotInterface({ selectedNode, role, selectedCaseId }:
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Translate welcome message if it's the only one
+  useEffect(() => {
+    setMessages(prev => {
+      if (prev.length === 1 && prev[0].sender === "bot") {
+        return [
+          {
+            sender: "bot",
+            content: language === "English"
+              ? "Authorized KSP Intelbot online. Query CCTNS POLE docket registers or trace financial transactions. Language automatically matched for Kannada and English."
+              : "ಅಧಿಕೃತ ಕೆಎಸ್‌ಪಿ ಇಂಟೆಲ್‌ಬಾಟ್ ಸಕ್ರಿಯವಾಗಿದೆ. ಸಿಸಿಟಿಎನ್‌ಎಸ್ ಪೋಲ್ ಡಾಕೆಟ್ ರಿಜಿಸ್ಟರ್‌ಗಳನ್ನು ಪ್ರಶ್ನಿಸಿ ಅಥವಾ ಹಣಕಾಸಿನ ವಹಿವಾಟುಗಳನ್ನು ಟ್ರೇಸ್ ಮಾಡಿ. ಭಾಷೆಯನ್ನು ಕನ್ನಡ ಮತ್ತು ಇಂಗ್ಲಿಷ್‌ಗೆ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಹೊಂದಿಸಲಾಗಿದೆ.",
+            timestamp: prev[0].timestamp
+          }
+        ];
+      }
+      return prev;
+    });
+  }, [language]);
 
   // Setup Web Speech Recognition
   useEffect(() => {
@@ -305,7 +324,11 @@ export default function ChatbotInterface({ selectedNode, role, selectedCaseId }:
         <div className="bg-[#D69A4E]/10 border-b border-[#D69A4E]/20 px-3 py-1.5 text-[9px] font-mono text-[#D69A4E] flex items-center justify-between gap-2 shrink-0">
           <div className="flex items-center gap-1.5">
             <AlertTriangle size={11} className="shrink-0 text-[#D69A4E]" />
-            <span className="leading-tight">Gemini API Rate Limit exceeded. Running Autonomous Offline Mode.</span>
+            <span className="leading-tight">
+              {language === "English" 
+                ? "Gemini API Rate Limit exceeded. Running Autonomous Offline Mode." 
+                : "ಜೆಮಿನಿ ಎಪಿಐ ಮಿತಿ ಮೀರಿದೆ. ಸ್ವಾಯತ್ತ ಆಫ್‌ಲೈನ್ ಮೋಡ್ ಚಾಲನೆಯಲ್ಲಿದೆ."}
+            </span>
           </div>
           <button 
             onClick={() => setIsQuotaExceeded(false)}
@@ -321,7 +344,7 @@ export default function ChatbotInterface({ selectedNode, role, selectedCaseId }:
         {messages.map((m, i) => (
           <div key={i} className={`flex flex-col ${m.sender === "user" ? "items-end" : "items-start"}`}>
             <span className="text-[9px] font-mono text-[#888888] mb-1 px-1">
-              {m.sender === "user" ? `Investigator (${role})` : "KSP AI"} · {m.timestamp}
+              {m.sender === "user" ? (language === "English" ? `Investigator (${role})` : `ತನಿಖಾಧಿಕಾರಿ (${role})`) : "KSP AI"} · {m.timestamp}
             </span>
             <div 
               className={`max-w-[85%] rounded px-3 py-2 text-xs font-mono leading-relaxed border ${
@@ -338,10 +361,12 @@ export default function ChatbotInterface({ selectedNode, role, selectedCaseId }:
         ))}
         {loading && (
           <div className="flex flex-col items-start">
-            <span className="text-[9px] font-mono text-[#888888] mb-1">Retrieving evidence trail...</span>
+            <span className="text-[9px] font-mono text-[#888888] mb-1">
+              {language === "English" ? "Retrieving evidence trail..." : "ಸಾಕ್ಷ್ಯದ ಹಾದಿಯನ್ನು ಹಿಂಪಡೆಯಲಾಗುತ್ತಿದೆ..."}
+            </span>
             <div className="bg-[#111111] text-[#888888] border border-[#333333] rounded px-3 py-2 text-xs font-mono flex items-center gap-2">
               <Sparkles size={13} className="animate-spin text-[#E53935]" />
-              Synthesizing legal references...
+              {language === "English" ? "Synthesizing legal references..." : "ಕಾನೂನು ಉಲ್ಲೇಖಗಳನ್ನು ಸಂಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ..."}
             </div>
           </div>
         )}
@@ -352,7 +377,7 @@ export default function ChatbotInterface({ selectedNode, role, selectedCaseId }:
       {selectedNode && (
         <div className="px-4 py-1.5 bg-[#E53935]/10 border-t border-[#E53935]/30 text-[10px] font-mono text-[#E53935] flex items-center gap-2 shrink-0">
           <AlertCircle size={12} />
-          Context Linked: {selectedNode.type} — {selectedNode.label} ({selectedNode.id})
+          {language === "English" ? "Context Linked: " : "ಸಂದರ್ಭ ಲಿಂಕ್ ಮಾಡಲಾಗಿದೆ: "}{selectedNode.type} — {selectedNode.label} ({selectedNode.id})
         </div>
       )}
 

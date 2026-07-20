@@ -29,6 +29,229 @@ const TYPE_COLOR: Record<string, string> = {
   BankAccount: '#9884AC'
 };
 
+const karnatakaDistricts = [
+  "Bagalkot",
+  "Ballari",
+  "Belagavi",
+  "Bengaluru Rural",
+  "Bengaluru Urban",
+  "Bidar",
+  "Chamarajanagar",
+  "Chikkaballapura",
+  "Chikkamagaluru",
+  "Chitradurga",
+  "Dakshina Kannada",
+  "Davanagere",
+  "Dharwad",
+  "Gadag",
+  "Hassan",
+  "Haveri",
+  "Kalaburagi",
+  "Kodagu",
+  "Kolar",
+  "Koppal",
+  "Mandya",
+  "Mysuru",
+  "Raichur",
+  "Ramanagara",
+  "Shivamogga",
+  "Tumakuru",
+  "Udupi",
+  "Uttara Kannada",
+  "Vijayanagara",
+  "Vijayapura",
+  "Yadgir"
+];
+
+const karnatakaStationMap: Record<string, { name: string; code: string }[]> = {
+  "Bagalkot": [
+    { name: "Bagalkot Town PS", code: "0649" },
+    { name: "Bagalkot Rural PS", code: "0651" },
+    { name: "Badami PS", code: "0653" },
+    { name: "Jamkhandi PS", code: "0660" }
+  ],
+  "Ballari": [
+    { name: "Ballari Town PS", code: "0512" },
+    { name: "Cowll Bazar PS", code: "0514" },
+    { name: "Brucepet PS", code: "0515" },
+    { name: "Ballari Rural PS", code: "0516" }
+  ],
+  "Belagavi": [
+    { name: "Belagavi Market PS", code: "0551" },
+    { name: "Belagavi Khadebazar PS", code: "0541" },
+    { name: "Belagavi Rural PS", code: "0557" },
+    { name: "Chikkodi PS", code: "0587" }
+  ],
+  "Bengaluru Rural": [
+    { name: "Hoskote PS", code: "0130" },
+    { name: "Doddaballapura Town PS", code: "0132" },
+    { name: "Nelamangala Town PS", code: "0135" },
+    { name: "Devanahalli PS", code: "0138" }
+  ],
+  "Bengaluru Urban": [
+    { name: "Jayanagar PS", code: "0031" },
+    { name: "Indiranagar PS", code: "0055" },
+    { name: "Yeshwanthpur PS", code: "0001" },
+    { name: "Whitefield PS", code: "0133" }
+  ],
+  "Bidar": [
+    { name: "Bidar Town PS", code: "0710" },
+    { name: "Gandhi Gunj PS", code: "0712" },
+    { name: "Basavakalyan PS", code: "0715" },
+    { name: "Bhalki Town PS", code: "0718" }
+  ],
+  "Chamarajanagar": [
+    { name: "Chamarajanagar Town PS", code: "0310" },
+    { name: "Kollegal Town PS", code: "0312" },
+    { name: "Gundlupet PS", code: "0315" },
+    { name: "Yelandur PS", code: "0318" }
+  ],
+  "Chikkaballapura": [
+    { name: "Chikkaballapura Town PS", code: "0180" },
+    { name: "Chintamani Town PS", code: "0182" },
+    { name: "Gauribidanur PS", code: "0185" },
+    { name: "Sidlaghatta Town PS", code: "0188" }
+  ],
+  "Chikkamagaluru": [
+    { name: "Chikkamagaluru Town PS", code: "0380" },
+    { name: "Kadur PS", code: "0382" },
+    { name: "Tarikere PS", code: "0385" },
+    { name: "Mudigere PS", code: "0388" }
+  ],
+  "Chitradurga": [
+    { name: "Chitradurga Town PS", code: "0530" },
+    { name: "Challakere PS", code: "0532" },
+    { name: "Hiriyur PS", code: "0535" },
+    { name: "Hosadurga PS", code: "0538" }
+  ],
+  "Dakshina Kannada": [
+    { name: "Mangaluru Town PS", code: "0360" },
+    { name: "Barke PS", code: "0362" },
+    { name: "Puttur Town PS", code: "0365" },
+    { name: "Bantwal Town PS", code: "0368" }
+  ],
+  "Davanagere": [
+    { name: "Davanagere Layout PS", code: "0501" },
+    { name: "Vidhananagar PS", code: "0503" },
+    { name: "Harihar Town PS", code: "0506" },
+    { name: "Honnali PS", code: "0509" }
+  ],
+  "Dharwad": [
+    { name: "Dharwad Town PS", code: "0410" },
+    { name: "Dharwad Suburban PS", code: "0412" },
+    { name: "Hubballi Town PS", code: "0117" },
+    { name: "Keshwapur PS", code: "0125" }
+  ],
+  "Gadag": [
+    { name: "Gadag Town PS", code: "0480" },
+    { name: "Gadag Rural PS", code: "0482" },
+    { name: "Nargund PS", code: "0485" },
+    { name: "Ronn PS", code: "0488" }
+  ],
+  "Hassan": [
+    { name: "Hassan Town PS", code: "0330" },
+    { name: "Extension PS", code: "0332" },
+    { name: "Arsikere Town PS", code: "0335" },
+    { name: "Channarayapatna PS", code: "0338" }
+  ],
+  "Haveri": [
+    { name: "Haveri Town PS", code: "0490" },
+    { name: "Ranebennur Town PS", code: "0492" },
+    { name: "Shiggaon PS", code: "0495" },
+    { name: "Byadgi PS", code: "0498" }
+  ],
+  "Kalaburagi": [
+    { name: "Kalaburagi Town PS", code: "0701" },
+    { name: "Brahampur PS", code: "0703" },
+    { name: "Sedam PS", code: "0708" },
+    { name: "Aland PS", code: "0711" }
+  ],
+  "Kodagu": [
+    { name: "Madikeri Town PS", code: "0340" },
+    { name: "Somwarpet PS", code: "0342" },
+    { name: "Virajpet Town PS", code: "0345" },
+    { name: "Gonikoppal PS", code: "0348" }
+  ],
+  "Kolar": [
+    { name: "Kolar Town PS", code: "0170" },
+    { name: "Robertsonpet PS (KGF)", code: "0172" },
+    { name: "Bangarapet PS", code: "0175" },
+    { name: "Mulbagal Town PS", code: "0178" }
+  ],
+  "Koppal": [
+    { name: "Koppal Town PS", code: "0730" },
+    { name: "Gangavathi Town PS", code: "0732" },
+    { name: "Yelburga PS", code: "0735" },
+    { name: "Kushtagi PS", code: "0738" }
+  ],
+  "Mandya": [
+    { name: "Mandya Town PS", code: "0320" },
+    { name: "Maddur PS", code: "0322" },
+    { name: "Srirangapatna PS", code: "0325" },
+    { name: "Pandavapura PS", code: "0328" }
+  ],
+  "Mysuru": [
+    { name: "Mandi PS", code: "0095" },
+    { name: "Narasimharaja PS", code: "0096" },
+    { name: "Jayalaxmipuram PS", code: "0098" },
+    { name: "Devaraja PS", code: "0101" }
+  ],
+  "Raichur": [
+    { name: "Raichur Town PS", code: "0740" },
+    { name: "Raichur West PS", code: "0742" },
+    { name: "Sindhanur Town PS", code: "0745" },
+    { name: "Manvi PS", code: "0748" }
+  ],
+  "Ramanagara": [
+    { name: "Ramanagara Town PS", code: "0149" },
+    { name: "Ijoor PS", code: "0150" },
+    { name: "Channapatna Town PS", code: "0140" },
+    { name: "Kanakapura Town PS", code: "0146" }
+  ],
+  "Shivamogga": [
+    { name: "Doddapet PS", code: "0540" },
+    { name: "Jayanagar PS", code: "0542" },
+    { name: "Bhadravathi Town PS", code: "0545" },
+    { name: "Sagara Town PS", code: "0548" }
+  ],
+  "Tumakuru": [
+    { name: "Tumakuru Town PS", code: "0160" },
+    { name: "Jayanagara PS", code: "0162" },
+    { name: "Sira PS", code: "0165" },
+    { name: "Tiptur Town PS", code: "0168" }
+  ],
+  "Udupi": [
+    { name: "Udupi Town PS", code: "0370" },
+    { name: "Manipal PS", code: "0372" },
+    { name: "Kundapura PS", code: "0375" },
+    { name: "Karkala Town PS", code: "0378" }
+  ],
+  "Uttara Kannada": [
+    { name: "Karwar Town PS", code: "0460" },
+    { name: "Sirsi Town PS", code: "0462" },
+    { name: "Bhatkal Town PS", code: "0465" },
+    { name: "Dandeli Town PS", code: "0468" }
+  ],
+  "Vijayanagara": [
+    { name: "Hosapete Town PS", code: "0520" },
+    { name: "Hampi PS", code: "0522" },
+    { name: "Kudligi PS", code: "0525" },
+    { name: "Harapanahalli PS", code: "0528" }
+  ],
+  "Vijayapura": [
+    { name: "Vijayapura Town PS", code: "0670" },
+    { name: "Gol Gumbaz PS", code: "0672" },
+    { name: "Indi PS", code: "0675" },
+    { name: "Muddebihal PS", code: "0678" }
+  ],
+  "Yadgir": [
+    { name: "Yadgir Town PS", code: "0750" },
+    { name: "Shahapur PS", code: "0752" },
+    { name: "Shorapur PS", code: "0755" },
+    { name: "Gurmatkal PS", code: "0758" }
+  ]
+};
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<"graph" | "investigation" | "trends" | "sociology" | "offender" | "financial" | "forecasting" | "governance">("graph");
   const [selectedNode, setSelectedNode] = useState<POLEEntity | null>(null);
@@ -50,6 +273,7 @@ export default function App() {
   const [loginPassword, setLoginPassword] = useState<string>("");
   const [theme, setTheme] = useState<"dark" | "light">("light");
   const [tempTheme, setTempTheme] = useState<"dark" | "light">("light");
+  const [language, setLanguage] = useState<"English" | "Kannada">("English");
   const [loginError, setLoginError] = useState<string | null>(null);
   const [gatewayStep, setGatewayStep] = useState<1 | 2>(1);
 
@@ -59,6 +283,24 @@ export default function App() {
   const [searchYear, setSearchYear] = useState<string>("2026");
   const [searchFirNumber, setSearchFirNumber] = useState<string>("");
   const [captchaInput, setCaptchaInput] = useState<string>("");
+  const [captchaCode, setCaptchaCode] = useState<string>(() => {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let result = "";
+    for (let i = 0; i < 5; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  });
+
+  const handleRefreshCaptcha = () => {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let result = "";
+    for (let i = 0; i < 5; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setCaptchaCode(result);
+    setCaptchaInput("");
+  };
 
   // Graph Algorithm States
   const [activeAlgo, setActiveAlgo] = useState<"core" | "between" | "community" | null>(null);
@@ -124,7 +366,7 @@ export default function App() {
       const response = await fetch("/api/summarize-case", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ entityId: selectedNode.id, role: role })
+        body: JSON.stringify({ entityId: selectedNode.id, role: role, language: language })
       });
       const data = await response.json();
       setSummaryText(data.summary);
@@ -151,7 +393,7 @@ export default function App() {
       const response = await fetch("/api/get-similar-cases", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ entityId: selectedNode.id, role: role })
+        body: JSON.stringify({ entityId: selectedNode.id, role: role, language: language })
       });
       const data = await response.json();
       setSimilarCases(data.matches || []);
@@ -180,12 +422,9 @@ export default function App() {
   if (!isLoggedIn) {
     // Dynamic police station list based on selected district
     let availableStations: string[] = [];
-    if (searchDistrict === "Bengaluru South Division") {
-      availableStations = ["Jayanagar PS (Unit-1044)"];
-    } else if (searchDistrict === "Bengaluru East Division") {
-      availableStations = ["Whitefield IT Corridor PS (Unit-1280)"];
-    } else if (searchDistrict === "Bengaluru Central Division") {
-      availableStations = ["Seshadripuram PS (Unit-3044)"];
+    if (searchDistrict) {
+      const stations = karnatakaStationMap[searchDistrict] || [];
+      availableStations = stations.map(s => `${s.name} (Unit-${s.code})`);
     }
 
     const handleSubmitSearch = (e: React.FormEvent) => {
@@ -206,18 +445,18 @@ export default function App() {
         setLoginError("Please enter FIR Number.");
         return;
       }
-      if (captchaInput.trim().toUpperCase() !== "DIXHX") {
-        setLoginError("Invalid Security Code (CAPTCHA). Please enter 'DIXHX'.");
+      if (captchaInput.trim().toUpperCase() !== captchaCode) {
+        setLoginError(`Invalid Security Code (CAPTCHA). Please enter '${captchaCode}'.`);
         return;
       }
 
       // Success! Map to active case target
       setLoginError(null);
-      if (searchDistrict === "Bengaluru South Division") {
+      if (searchStation.includes("Jayanagar") || searchStation.includes("Town PS")) {
         setSelectedCaseId("jayanagar");
-      } else if (searchDistrict === "Bengaluru East Division") {
+      } else if (searchStation.includes("Whitefield") || searchStation.includes("Rural PS")) {
         setSelectedCaseId("whitefield");
-      } else if (searchDistrict === "Bengaluru Central Division") {
+      } else if (searchStation.includes("Seshadripuram") || searchStation.includes("Traffic PS")) {
         setSelectedCaseId("seshadripuram");
       } else {
         setSelectedCaseId("jayanagar");
@@ -281,9 +520,9 @@ export default function App() {
                     className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 rounded px-3 py-2 text-xs font-mono text-slate-800 outline-none transition-colors cursor-pointer appearance-none"
                   >
                     <option value="">Select District / Division</option>
-                    <option value="Bengaluru South Division">Bengaluru South Division</option>
-                    <option value="Bengaluru East Division">Bengaluru East Division</option>
-                    <option value="Bengaluru Central Division">Bengaluru Central Division</option>
+                    {karnatakaDistricts.map(dist => (
+                      <option key={dist} value={dist}>{dist}</option>
+                    ))}
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-500">
                     <ChevronRight size={14} className="rotate-90 text-slate-500" />
@@ -329,9 +568,9 @@ export default function App() {
                     onChange={(e) => setSearchYear(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 rounded px-3 py-2 text-xs font-mono text-slate-800 outline-none transition-colors cursor-pointer appearance-none"
                   >
-                    <option value="2026">2026</option>
-                    <option value="2025">2025</option>
-                    <option value="2024">2024</option>
+                    {Array.from({ length: 2026 - 2010 + 1 }, (_, i) => 2026 - i).map(year => (
+                      <option key={year} value={year.toString()}>{year}</option>
+                    ))}
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-500">
                     <ChevronRight size={14} className="rotate-90 text-slate-500" />
@@ -355,12 +594,23 @@ export default function App() {
 
               {/* Security CAPTCHA section */}
               <div className="space-y-3 pt-2">
-                <label className="block text-[11px] font-mono font-semibold text-slate-600">
-                  Security Check <span className="text-red-500 font-bold">*</span>
+                <label className="block text-[11px] font-mono font-semibold text-slate-600 flex justify-between items-center">
+                  <span>Security Check <span className="text-red-500 font-bold">*</span></span>
+                  <span 
+                    onClick={handleRefreshCaptcha}
+                    className="text-[10px] font-mono text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer select-none normal-case"
+                    title="Generate new CAPTCHA code"
+                  >
+                    <RefreshCw size={10} /> Refresh Code
+                  </span>
                 </label>
                 
                 {/* Image-based Security Challenge Box */}
-                <div className="bg-slate-100 border border-slate-200 rounded-lg py-3 flex items-center justify-center relative overflow-hidden shadow-inner">
+                <div 
+                  onClick={handleRefreshCaptcha}
+                  className="bg-slate-100 border border-slate-200 rounded-lg py-3 flex items-center justify-center relative overflow-hidden shadow-inner cursor-pointer group"
+                  title="Click to refresh CAPTCHA"
+                >
                   {/* Styled security noise lines overlay */}
                   <div className="absolute inset-0 pointer-events-none opacity-20">
                     <div className="w-full h-full bg-[repeating-linear-gradient(45deg,#ccc,#ccc_10px,#fff_10px,#fff_20px)] opacity-15"></div>
@@ -368,8 +618,8 @@ export default function App() {
                     <div className="absolute top-6 left-0 right-0 h-0.5 bg-blue-400 -rotate-3"></div>
                     <div className="absolute top-4 left-0 right-0 h-0.5 bg-green-400 rotate-12"></div>
                   </div>
-                  <span className="text-lg font-mono font-extrabold tracking-[0.4em] text-slate-700 select-none px-4 py-1 border-2 border-dashed border-slate-300 rounded bg-white skew-x-12">
-                    DIXHX
+                  <span className="text-lg font-mono font-extrabold tracking-[0.4em] text-slate-700 select-none px-4 py-1 border-2 border-dashed border-slate-300 rounded bg-white skew-x-12 transition-transform group-hover:scale-105">
+                    {captchaCode}
                   </span>
                 </div>
 
@@ -419,60 +669,89 @@ export default function App() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold text-[#E53935] tracking-[0.15em] uppercase">KSP Intelligence Terminal</span>
-              <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-[#E53935]/15 text-[#E53935] border border-[#E53935]/30">SECURE SHELL</span>
+              <span className="text-xs font-mono font-bold text-[#E53935] tracking-[0.15em] uppercase">
+                {language === "English" ? "KSP Intelligence Terminal" : "ಕೆಎಸ್‌ಪಿ ಇಂಟೆಲಿಜೆನ್ಸ್ ಟರ್ಮಿನಲ್"}
+              </span>
+              <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-[#E53935]/15 text-[#E53935] border border-[#E53935]/30">
+                {language === "English" ? "SECURE SHELL" : "ಸುರಕ್ಷಿತ ಸಂಪರ್ಕ"}
+              </span>
             </div>
-            <h1 className="text-sm font-bold tracking-wider uppercase text-[#E0E0E0] font-sans mt-0.5">Karnataka State Police · Centralized Docket System</h1>
+            <h1 className="text-sm font-bold tracking-wider uppercase text-[#E0E0E0] font-sans mt-0.5">
+              {language === "English" 
+                ? "Karnataka State Police · Centralized Docket System" 
+                : "ಕರ್ನಾಟಕ ರಾಜ್ಯ ಪೊಲೀಸ್ · ಕೇಂದ್ರೀಕೃತ ಡಾಕೆಟ್ ವ್ಯವಸ್ಥೆ"}
+            </h1>
           </div>
         </div>
 
         <div className="flex flex-wrap lg:flex-nowrap items-center justify-between lg:justify-end gap-4 text-xs font-mono w-full lg:w-auto">
           {/* Theme Quick Selector */}
           <div className="flex items-center gap-2 bg-[#1A1A1A] border border-[#333333] rounded px-2.5 py-0.5">
-            <span className="text-[9px] text-[#888888] font-mono uppercase tracking-wider">Theme:</span>
+            <span className="text-[9px] text-[#888888] font-mono uppercase tracking-wider">
+              {language === "English" ? "Theme:" : "ಥೀಮ್:"}
+            </span>
             <button 
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="px-2 py-0.5 text-[9px] font-mono rounded-sm transition-all cursor-pointer text-[#888888] hover:text-[#E53935] flex items-center gap-1.5 font-bold uppercase"
-              title="Toggle Light/Dark Theme"
+              title={language === "English" ? "Toggle Light/Dark Theme" : "ಬೆಳಕು/ಕತ್ತಲು ಥೀಮ್ ಬದಲಾಯಿಸಿ"}
             >
               {theme === "dark" ? <Moon size={11} className="text-[#9884AC]" /> : <Sun size={11} className="text-[#D69A4E]" />}
-              <span>{theme}</span>
+              <span>{theme === "dark" ? (language === "English" ? "dark" : "ಕತ್ತಲು") : (language === "English" ? "light" : "ಬೆಳಕು")}</span>
             </button>
+          </div>
+
+          <div className="h-8 w-px bg-[#333333]"></div>
+
+          {/* Language Selector */}
+          <div className="flex items-center gap-2 bg-[#1A1A1A] border border-[#333333] rounded px-2.5 py-0.5">
+            <span className="text-[9px] text-[#888888] font-mono uppercase tracking-wider">
+              {language === "English" ? "Language:" : "ಭಾಷೆ:"}
+            </span>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as any)}
+              className="bg-[#1A1A1A] border-none text-[9px] font-mono text-[#E0E0E0] outline-none cursor-pointer pl-1 uppercase font-bold"
+            >
+              <option value="English">English</option>
+              <option value="Kannada">ಕನ್ನಡ (KN)</option>
+            </select>
           </div>
 
           <div className="h-8 w-px bg-[#333333]"></div>
 
           {/* Workspace Layout Settings */}
           <div className="flex items-center gap-2 bg-[#1A1A1A] border border-[#333333] rounded px-2 py-0.5">
-            <span className="text-[9px] text-[#888888] font-mono uppercase tracking-wider pl-1">Sidebar:</span>
+            <span className="text-[9px] text-[#888888] font-mono uppercase tracking-wider pl-1">
+              {language === "English" ? "Sidebar:" : "ಸೈಡ್‌ಬಾರ್:"}
+            </span>
             <div className="flex bg-[#111111] rounded border border-[#333333] overflow-hidden p-0.5">
               <button 
                 onClick={() => setRightPanelWidth("hidden")}
-                title="Hide Sidebar (Full Canvas)"
+                title={language === "English" ? "Hide Sidebar (Full Canvas)" : "ಸೈಡ್‌ಬಾರ್ ಮರೆಮಾಡು"}
                 className={`px-2 py-0.5 text-[9px] font-mono rounded-sm transition-all cursor-pointer ${rightPanelWidth === "hidden" ? "bg-[#E53935] text-white font-bold" : "text-[#888888] hover:text-[#E0E0E0]"}`}
               >
-                Hide
+                {language === "English" ? "Hide" : "ಮರೆಮಾಡು"}
               </button>
               <button 
                 onClick={() => setRightPanelWidth("narrow")}
-                title="Narrow Sidebar"
+                title={language === "English" ? "Narrow Sidebar" : "ಕಿರಿದಾದ ಸೈಡ್‌ಬಾರ್"}
                 className={`px-2 py-0.5 text-[9px] font-mono rounded-sm transition-all cursor-pointer ${rightPanelWidth === "narrow" ? "bg-[#E53935] text-white font-bold" : "text-[#888888] hover:text-[#E0E0E0]"}`}
               >
-                Narrow
+                {language === "English" ? "Narrow" : "ಕಿರಿದಾದ"}
               </button>
               <button 
                 onClick={() => setRightPanelWidth("default")}
-                title="Default Sidebar"
+                title={language === "English" ? "Default Sidebar" : "ಸಾಮಾನ್ಯ ಸೈಡ್‌ಬಾರ್"}
                 className={`px-2 py-0.5 text-[9px] font-mono rounded-sm transition-all cursor-pointer ${rightPanelWidth === "default" ? "bg-[#E53935] text-white font-bold" : "text-[#888888] hover:text-[#E0E0E0]"}`}
               >
-                Std
+                {language === "English" ? "Std" : "ಸಾಮಾನ್ಯ"}
               </button>
               <button 
                 onClick={() => setRightPanelWidth("wide")}
-                title="Wide Sidebar"
+                title={language === "English" ? "Wide Sidebar" : "ಅಗಲವಾದ ಸೈಡ್‌ಬಾರ್"}
                 className={`px-2 py-0.5 text-[9px] font-mono rounded-sm transition-all cursor-pointer ${rightPanelWidth === "wide" ? "bg-[#E53935] text-white font-bold" : "text-[#888888] hover:text-[#E0E0E0]"}`}
               >
-                Wide
+                {language === "English" ? "Wide" : "ಅಗಲ"}
               </button>
             </div>
           </div>
@@ -480,15 +759,19 @@ export default function App() {
           <div className="h-8 w-px bg-[#333333]"></div>
 
           <div className="text-right">
-            <span className="text-[#888888] text-[9px] tracking-widest block uppercase">Active Case Docket</span>
-            <span className="text-[#E0E0E0] font-bold">{docketInfo.docketId} · South Div</span>
+            <span className="text-[#888888] text-[9px] tracking-widest block uppercase">
+              {language === "English" ? "Active Case Docket" : "ಸಕ್ರಿಯ ಪ್ರಕರಣ ದಾಖಲೆ"}
+            </span>
+            <span className="text-[#E0E0E0] font-bold">{docketInfo.docketId} · {language === "English" ? "South Div" : "ದಕ್ಷಿಣ ವಿಭಾಗ"}</span>
           </div>
           
           <div className="h-8 w-px bg-[#333333]"></div>
 
           <div className="flex items-center gap-2">
             <div className="text-right">
-              <span className="text-[#888888] text-[9px] tracking-widest block uppercase">Operator</span>
+              <span className="text-[#888888] text-[9px] tracking-widest block uppercase">
+                {language === "English" ? "Operator" : "ನಿರ್ವಾಹಕರು"}
+              </span>
               <span className="text-[#E0E0E0] font-medium">martisajay117@gmail.com</span>
             </div>
             
@@ -501,10 +784,10 @@ export default function App() {
               }}
               className="bg-[#1A1A1A] border border-[#333333] text-xs font-mono text-[#E53935] rounded px-2.5 py-1 outline-none focus:border-[#E53935] cursor-pointer"
             >
-              <option value="Supervisor">Supervisor (Full PII)</option>
-              <option value="Investigator">Investigator (Standard)</option>
-              <option value="Analyst">Analyst (Masked PII)</option>
-              <option value="Policymaker">Policymaker (Macro-only)</option>
+              <option value="Supervisor">{language === "English" ? "Supervisor (Full PII)" : "ಮೇಲ್ವಿಚಾರಕರು (ಪೂರ್ಣ PII)"}</option>
+              <option value="Investigator">{language === "English" ? "Investigator (Standard)" : "ತನಿಖಾಧಿಕಾರಿ (ಸಾಮಾನ್ಯ)"}</option>
+              <option value="Analyst">{language === "English" ? "Analyst (Masked PII)" : "ವಿಶ್ಲೇಷಕರು (ಮರೆಮಾಡಿದ PII)"}</option>
+              <option value="Policymaker">{language === "English" ? "Policymaker (Macro-only)" : "ನೀತಿ ನಿರೂಪಕರು (ಮ್ಯಾಕ್ರೋ ಮಾತ್ರ)"}</option>
             </select>
           </div>
         </div>
@@ -536,14 +819,14 @@ export default function App() {
           {/* Tab buttons */}
           <div className="flex gap-1.5 overflow-x-auto pb-1 border-b border-[#333333] no-scrollbar select-none">
             {[
-              { id: "graph", label: "POLE Link Network", icon: <Network size={14} /> },
-              { id: "investigation", label: "Case Investigation", icon: <Compass size={14} /> },
-              { id: "trends", label: "Pattern & Hotspots", icon: <TrendingUp size={14} /> },
-              { id: "sociology", label: "Demographic Insights", icon: <Users size={14} /> },
-              { id: "offender", label: "Offender Profiling", icon: <Clock size={14} /> },
-              { id: "financial", label: "Money Trail Ledger", icon: <Coins size={14} /> },
-              { id: "forecasting", label: "Forecasting Alerts", icon: <Zap size={14} /> },
-              { id: "governance", label: "Governance & Compliance Logs", icon: <Shield size={14} /> }
+              { id: "graph", label: language === "English" ? "POLE Link Network" : "ಲಿಂಕ್ ನೆಟ್‌ವರ್ಕ್ (POLE)", icon: <Network size={14} /> },
+              { id: "investigation", label: language === "English" ? "Case Investigation" : "ಪ್ರಕರಣ ತನಿಖೆ", icon: <Compass size={14} /> },
+              { id: "trends", label: language === "English" ? "Pattern & Hotspots" : "ಅಪರಾಧ ಹಾಟ್‌ಸ್ಪಾಟ್‌ಗಳು", icon: <TrendingUp size={14} /> },
+              { id: "sociology", label: language === "English" ? "Demographic Insights" : "ಜನಸಂಖ್ಯಾ ಒಳನೋಟಗಳು", icon: <Users size={14} /> },
+              { id: "offender", label: language === "English" ? "Offender Profiling" : "ಅಪರಾಧಿಗಳ ವಿವರ", icon: <Clock size={14} /> },
+              { id: "financial", label: language === "English" ? "Money Trail Ledger" : "ಹಣಕಾಸು ಜಾಡು", icon: <Coins size={14} /> },
+              { id: "forecasting", label: language === "English" ? "Forecasting Alerts" : "ಮುನ್ಸೂಚನೆ ಎಚ್ಚರಿಕೆಗಳು", icon: <Zap size={14} /> },
+              { id: "governance", label: language === "English" ? "Governance & Compliance Logs" : "ಆಡಳಿತ ಮತ್ತು ಅನುಸರಣೆ", icon: <Shield size={14} /> }
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -723,12 +1006,12 @@ export default function App() {
           {/* Quick restore bar if Case Inspector is hidden */}
           {splitRatio === "chatOnly" && (
             <div className="bg-[#1A1A1A] border border-[#333333] rounded px-3 py-1.5 flex justify-between items-center text-[10px] font-mono text-[#888888] shrink-0">
-              <span>Case Inspector is collapsed.</span>
+              <span>{language === "English" ? "Case Inspector is collapsed." : "ಪ್ರಕರಣ ಇನ್ಸ್‌ಪೆಕ್ಟರ್ ಕಿರಿದಾಗಿದೆ."}</span>
               <button
                 onClick={() => setSplitRatio("default")}
                 className="text-[#E53935] hover:underline font-bold cursor-pointer"
               >
-                Restore Inspector
+                {language === "English" ? "Restore Inspector" : "ಇನ್ಸ್‌ಪೆಕ್ಟರ್ ಮರುಸ್ಥಾಪಿಸಿ"}
               </button>
             </div>
           )}
@@ -741,7 +1024,7 @@ export default function App() {
           }`}>
             <div className="flex justify-between items-center border-b border-[#333333] pb-1.5">
               <span className="text-[10px] font-mono font-bold text-[#888888] uppercase tracking-widest block">
-                CCTNS Case Inspector
+                {language === "English" ? "CCTNS Case Inspector" : "ಸಿಸಿಟಿಎನ್ಎಸ್ ಪ್ರಕರಣ ಇನ್ಸ್‌ಪೆಕ್ಟರ್"}
               </span>
               <div className="flex items-center gap-1.5">
                 <button
@@ -806,7 +1089,9 @@ export default function App() {
                     disabled={loadingSummary}
                     className="flex-1 bg-[#E53935] hover:bg-[#c62828] text-[#ffffff] rounded px-2.5 py-1.5 text-[10px] font-bold tracking-wider uppercase transition-colors disabled:opacity-40 cursor-pointer"
                   >
-                    {loadingSummary ? "Compiling..." : "Generate Brief"}
+                    {loadingSummary 
+                      ? (language === "English" ? "Compiling..." : "ಸಂಕಲಿಸಲಾಗುತ್ತಿದೆ...") 
+                      : (language === "English" ? "Generate Brief" : "ವರದಿ ರಚಿಸಿ")}
                   </button>
 
                   <button
@@ -814,7 +1099,9 @@ export default function App() {
                     disabled={loadingSimilar}
                     className="flex-1 bg-transparent hover:bg-[#111111] text-[#E0E0E0] rounded px-2.5 py-1.5 text-[10px] border border-[#333333] hover:border-[#E53935] font-bold tracking-wider uppercase transition-colors disabled:opacity-40 cursor-pointer"
                   >
-                    {loadingSimilar ? "Matching..." : "Compare Past"}
+                    {loadingSimilar 
+                      ? (language === "English" ? "Matching..." : "ಹೋಲಿಸಲಾಗುತ್ತಿದೆ...") 
+                      : (language === "English" ? "Compare Past" : "ಹಿಂದಿನ ಹೋಲಿಕೆ")}
                   </button>
                 </div>
 
@@ -824,10 +1111,16 @@ export default function App() {
                     <div className="flex items-center justify-between text-[#E53935] font-bold mb-1">
                       <div className="flex items-center gap-1">
                         <Sparkles size={11} />
-                        <span>{summaryOffline ? "Autonomous Compiled Brief" : "Gemini Compiled Brief"}</span>
+                        <span>
+                          {summaryOffline 
+                            ? (language === "English" ? "Autonomous Compiled Brief" : "ಸ್ವಾಯತ್ತ ಸಂಕಲಿತ ವರದಿ") 
+                            : (language === "English" ? "Gemini Compiled Brief" : "ಜೆಮಿನಿ ಸಂಕಲಿತ ವರದಿ")}
+                        </span>
                       </div>
                       {summaryOffline && (
-                        <span className="text-[8px] font-mono px-1 py-0.2 bg-[#D69A4E]/15 text-[#D69A4E] border border-[#D69A4E]/30 rounded">OFFLINE</span>
+                        <span className="text-[8px] font-mono px-1 py-0.2 bg-[#D69A4E]/15 text-[#D69A4E] border border-[#D69A4E]/30 rounded">
+                          {language === "English" ? "OFFLINE" : "ಆಫ್‌ಲೈನ್"}
+                        </span>
                       )}
                     </div>
                     <div className="whitespace-pre-line">{summaryText}</div>
@@ -838,9 +1131,13 @@ export default function App() {
                 {similarCases.length > 0 && (
                   <div className="space-y-2 mt-3 pt-3 border-t border-[#333333]">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-[#D69A4E] block uppercase">Archive Matches</span>
+                      <span className="text-[10px] font-bold text-[#D69A4E] block uppercase">
+                        {language === "English" ? "Archive Matches" : "ಆರ್ಕೈವ್ ಹೋಲಿಕೆಗಳು"}
+                      </span>
                       {similarOffline && (
-                        <span className="text-[8px] font-mono px-1 py-0.2 bg-[#D69A4E]/15 text-[#D69A4E] border border-[#D69A4E]/30 rounded">OFFLINE</span>
+                        <span className="text-[8px] font-mono px-1 py-0.2 bg-[#D69A4E]/15 text-[#D69A4E] border border-[#D69A4E]/30 rounded">
+                          {language === "English" ? "OFFLINE" : "ಆಫ್‌ಲೈನ್"}
+                        </span>
                       )}
                     </div>
                     <div className="space-y-2 max-h-[160px] overflow-y-auto">
@@ -861,7 +1158,9 @@ export default function App() {
               </div>
             ) : (
               <span className="text-[10px] text-[#888888] italic">
-                No active target selected. Click any node in the canvas to inspect its POLE attributes and compile briefings.
+                {language === "English" 
+                  ? "No active target selected. Click any node in the canvas to inspect its POLE attributes and compile briefings."
+                  : "ಯಾವುದೇ ಸಕ್ರಿಯ ಗುರಿಯನ್ನು ಆಯ್ಕೆ ಮಾಡಲಾಗಿಲ್ಲ. ಗುಣಲಕ್ಷಣಗಳನ್ನು ಪರಿಶೀಲಿಸಲು ಮತ್ತು ಬ್ರೀಫಿಂಗ್‌ಗಳನ್ನು ಕಂಪೈಲ್ ಮಾಡಲು ಕ್ಯಾನ್ವಾಸ್‌ನಲ್ಲಿರುವ ಯಾವುದೇ ನೋಡ್ ಅನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ."}
               </span>
             )}
           </div>
@@ -870,18 +1169,24 @@ export default function App() {
           <div className={`flex-1 min-h-0 flex flex-col overflow-hidden ${
             splitRatio === "inspectorOnly" ? "hidden" : ""
           }`}>
-            <ChatbotInterface selectedNode={selectedNode} role={role} selectedCaseId={selectedCaseId} />
+            <ChatbotInterface 
+              selectedNode={selectedNode} 
+              role={role} 
+              selectedCaseId={selectedCaseId} 
+              language={language}
+              setLanguage={setLanguage}
+            />
           </div>
 
           {/* Quick restore bar if Conversational Intelbot is hidden */}
           {splitRatio === "inspectorOnly" && (
             <div className="bg-[#1A1A1A] border border-[#333333] rounded px-3 py-1.5 flex justify-between items-center text-[10px] font-mono text-[#888888] shrink-0">
-              <span>Intelbot is collapsed.</span>
+              <span>{language === "English" ? "Intelbot is collapsed." : "ಇಂಟೆಲ್‌ಬಾಟ್ ಕಿರಿದಾಗಿದೆ."}</span>
               <button
                 onClick={() => setSplitRatio("default")}
                 className="text-[#E53935] hover:underline font-bold cursor-pointer"
               >
-                Restore Intelbot
+                {language === "English" ? "Restore Intelbot" : "ಇಂಟೆಲ್‌ಬಾಟ್ ಮರುಸ್ಥಾಪಿಸಿ"}
               </button>
             </div>
           )}

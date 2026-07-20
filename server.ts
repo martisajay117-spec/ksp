@@ -390,13 +390,47 @@ function generateOfflineChatResponse(query: string, selectedNodeId?: string, lan
   3. Interrogate getaway driver A. Farooq regarding the country-made pistol recovered from his vehicle.`;
 }
 
-function generateOfflineSummary(node: any, neighbors: any[]): string {
-  const piiWarning = node.type === "Person" ? "⚠️ Restrictive access under DPDP Act 2023. Contains PII." : "Public/System Metadata.";
+function generateOfflineSummary(node: any, neighbors: any[], language: string = "English"): string {
+  const isKannada = language === "Kannada";
+  const piiWarning = node.type === "Person" 
+    ? (isKannada ? "⚠️ DPDP ಕಾಯ್ದೆ 2023 ರ ಅಡಿಯಲ್ಲಿ ನಿರ್ಬಂಧಿತ ಪ್ರವೇಶ. PII ವಿವರಗಳನ್ನು ಹೊಂದಿದೆ." : "⚠️ Restrictive access under DPDP Act 2023. Contains PII.")
+    : (isKannada ? "ಸಾರ್ವಜನಿಕ/ಸಿಸ್ಟಮ್ ಮೆಟಾಡೇಟಾ." : "Public/System Metadata.");
   
   let body = "";
   if (node.type === "Person") {
     const attrs = node.attrs || {};
-    body = `### Executive Briefing: ${node.label} (${node.id})
+    if (isKannada) {
+      body = `### ಕಾರ್ಯನಿರ್ವಾಹಕ ಬ್ರೀಫಿಂಗ್: ${node.label} (${node.id})
+- **ವರ್ಗೀಕರಣ**: ${attrs.role === "Prime Accused" ? "ಪ್ರಮುಖ ಆರೋಪಿ" : attrs.role === "Associate/Receiver" ? "ಸಹಚರ/ರಿಸೀವರ್" : attrs.role === "Getaway Driver" ? "ಗೆಟ್‌ಅವೇ ಡ್ರೈವರ್" : attrs.role || "ಶಂಕಿತ"}
+- **ರಚನಾತ್ಮಕ ಅಪಾಯದ ಸ್ಕೋರ್**: **${attrs.risk_score || "0.50"}**
+- **ಸಾಮಾಜಿಕ-ಜನಸಂಖ್ಯಾ ಸಂದರ್ಭ**: ವಯಸ್ಸು ${attrs.age || "N/A"}, ಲಿಂಗ: ${attrs.gender === "Male" ? "ಪುರುಷ" : attrs.gender || "ಪುರುಷ"}. ಹಿನ್ನೆಲೆ: ${attrs.background || "N/A"}
+- **ಶಿಕ್ಷಣ ಮಟ್ಟ**: ${attrs.education || "ಮಾಧ್ಯಮಿಕ ಶಾಲೆ"}
+
+#### 1. ಕ್ರಿಮಿನಲ್ ವರ್ತನೆ ಮತ್ತು ಕೃತ್ಯದ ಶೈಲಿ (MO)
+ವಿಷಯದ ಮೋಡಸ್ ಆಪರೇಂಡಿ ವೃತ್ತಿಪರ ಅಪರಾಧ ಜಾಲಗಳಿಗೆ ಹೊಂದಿಕೆಯಾಗುತ್ತದೆ.
+- **MO ಸಿಗ್ನೇಚರ್**: ${attrs.mo_signature || "ರಾತ್ರಿ ವೇಳೆ ಮನೆಗಳ್ಳತನ, ಕದ್ದ ಮಾಲು ಸ್ವೀಕರಿಸುವುದು ಅಥವಾ ತಪ್ಪಿಸಿಕೊಳ್ಳುವ ಲಾಜಿಸ್ಟಿಕ್ಸ್."}
+- **ಗ್ಯಾಂಗ್ ಸಂಯೋಜನೆ**: ${attrs.known_gang_affiliation || "ಯಾವುದೂ ಪತ್ತೆಯಾಗಿಲ್ಲ."}
+
+#### 2. ಮರುನಿರ್ಮಾಣಗೊಂಡ ಸಂಬಂಧಗಳು ಮತ್ತು ನೆಟ್‌ವರ್ಕ್ ಸಂಪರ್ಕಗಳು
+ಪ್ರಕರಣದ ಫೈಲ್‌ಗಳಲ್ಲಿ ವಿಷಯವು ಇತರ ${neighbors.length} ಘಟಕಗಳಿಗೆ ಲಿಂಕ್ ಮಾಡಲ್ಪಟ್ಟಿದೆ:
+${neighbors.map(n => {
+  const otherLabel = n.entity && typeof n.entity === 'object' && n.entity.label ? n.entity.label : n.entity;
+  const otherId = n.entity && typeof n.entity === 'object' && n.entity.id ? n.entity.id : "";
+  const otherType = n.entity && typeof n.entity === 'object' && n.entity.type ? n.entity.type : "";
+  return `- **${n.relationship}** ಸಂಬಂಧ **${otherLabel}** [${otherId || n.entity}] (${otherType || "ಅಜ್ಞಾತ"}) ನೊಂದಿಗೆ`;
+}).join("\n")}
+
+#### 3. ತಕ್ಷಣದ ತನಿಖಾ ಸುಳಿವುಗಳು
+1. 2026-07-04 ರಂದು ಕಳವು ನಡೆದ ಸಮಯದಲ್ಲಿ ಸೆಲ್-ಟವರ್ ಲೊಕೇಶನ್ ಅತಿಕ್ರಮಣಗಳ ಬಗ್ಗೆ ಪ್ರಾಥಮಿಕ ಸಂಪರ್ಕಗಳನ್ನು ಕ್ರಾಸ್-ವಿಚಾರಣೆ ಮಾಡಿ.
+2. ಲಿಂಕ್ ಮಾಡಲಾದ ಖಾತೆಗಳಿಗಾಗಿ ಬಿಎನ್‌ಎಸ್ಎಸ್ ಸೆಕ್ಷನ್ 193 ಅಡಿಯಲ್ಲಿ ಬ್ಯಾಂಕಿಂಗ್ ನೋಟಿಸ್‌ಗಳನ್ನು ರಚಿಸಿ.
+3. ಅವರ ಪರಿಶೀಲಿಸಿದ ಭೌತಿಕ ವಿಳಾಸಗಳಲ್ಲಿ ಸಕ್ರಿಯ ಕಣ್ಗಾವಲು ನಿರ್ದೇಶಾಂಕಗಳನ್ನು ಸ್ಥಾಪಿಸಿ.
+
+#### 4. ಕಾನೂನು ಅನುಸರಣೆ ಆಡಿಟಿಂಗ್ (BNSS Sec 173/193)
+- ${piiWarning}
+- 14 ದಿನಗಳ ಶಾಸನಬದ್ಧ ಅವಧಿಯೊಳಗೆ ಪ್ರಾಥಮಿಕ ವಿಚಾರಣೆಯನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಮುಚ್ಚಲಾಗಿದೆ.
+- ಫಿಂಗರ್‌ಪ್ರಿಂಟ್/ವಿಧಿವಿಜ್ಞಾನದ ಜಾಡನ್ನು ಪೂರ್ಣಗೊಳಿಸಲಾಗಿದೆ ಮತ್ತು ಇ-ಫೋರೆನ್ಸಿಕ್ಸ್ ಮಾಡ್ಯೂಲ್‌ಗೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗಿದೆ.`;
+    } else {
+      body = `### Executive Briefing: ${node.label} (${node.id})
 - **Classification**: ${attrs.role || "Suspect"}
 - **Structural Risk Score**: **${attrs.risk_score || "0.50"}**
 - **Socio-demographic context**: Age ${attrs.age || "N/A"}, ${attrs.gender || "Male"}. Background: ${attrs.background || "N/A"}
@@ -425,9 +459,32 @@ ${neighbors.map(n => {
 - ${piiWarning}
 - Preliminary inquiry successfully closed within the 14-day statutory timeline.
 - Fingerprint/forensics trail completed and uploaded to e-Forensics module.`;
+    }
   } else if (node.type === "BankAccount") {
     const attrs = node.attrs || {};
-    body = `### Financial Audit Docket: ${node.label} (${node.id})
+    if (isKannada) {
+      body = `### ಹಣಕಾಸು ಆಡಿಟ್ ಡಾಕೆಟ್: ${node.label} (${node.id})
+- **ಸಂಸ್ಥೆ**: ${attrs.bank_name || "ಸ್ಟೇಟ್ ಬ್ಯಾಂಕ್ ಆಫ್ ಇಂಡಿಯಾ"}
+- **ಖಾತೆ ಸಂಖ್ಯೆ**: ${attrs.account_num || "N/A"}
+- **KYC ಅನುಸರಣೆ**: **${attrs.kyc_status === "Verified" ? "ಪರಿಶೀಲಿಸಲಾಗಿದೆ" : attrs.kyc_status || "ಪರಿಶೀಲಿಸಲಾಗಿದೆ"}**
+- **ಪ್ರಸ್ತುತ ಬ್ಯಾಲೆನ್ಸ್**: ${attrs.current_balance || "N/A"}
+
+#### 1. ವಹಿವಾಟುಗಳ ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ಲೆಡ್ಜರ್ ಚಟುವಟಿಕೆ
+ಈ ನೋಡ್ ಕೇಂದ್ರ ಹಣಕಾಸು ನಿಯಂತ್ರಣ ಚಾನಲ್‌ನ ಭಾಗವಾಗಿದೆ.
+${neighbors.map(n => {
+  const otherLabel = n.entity && typeof n.entity === 'object' && n.entity.label ? n.entity.label : n.entity;
+  const amountStr = n.meta && n.meta.amount ? ` (ಮೊತ್ತ: ${n.meta.amount})` : "";
+  return `- **${n.relationship}** ಸಂಬಂಧ **${otherLabel}** ನೊಂದಿಗೆ${amountStr}`;
+}).join("\n")}
+
+#### 2. ಮನಿ ಲಾಂಡರಿಂಗ್ ಸೂಚಕಗಳು
+- ದೊಡ್ಡ RTGS ಸ್ವೀಕೃತಿಗಳನ್ನು ಸಣ್ಣ ನೇರ NEFT/IMPS ಹಿಂಪಡೆಯುವಿಕೆಗಳಾಗಿ ಲೇಯರಿಂಗ್ ಮಾಡುವುದು.
+- ಕಳ್ಳತನ/ಮನೆಗಳ್ಳತನದ ಹಿನ್ನೆಲೆ ಹೊಂದಿರುವ ಶಂಕಿತರೊಂದಿಗೆ ನೇರ ಸಂಪರ್ಕ.
+
+#### 3. ಕಾನೂನು ಸ್ಥಿತಿ
+- ಬಿಎನ್‌ಎಸ್ಎಸ್ ಸೆಕ್ಷನ್ 193 ರ ಅಡಿಯಲ್ಲಿ ಖಾತೆಯನ್ನು ಸ್ಥಗಿತಗೊಳಿಸುವ ವಿನಂತಿ ಬಾಕಿ ಇದೆ.`;
+    } else {
+      body = `### Financial Audit Docket: ${node.label} (${node.id})
 - **Institution**: ${attrs.bank_name || "State Bank of India"}
 - **Account Number**: ${attrs.account_num || "N/A"}
 - **KYC Compliance**: **${attrs.kyc_status || "Verified"}**
@@ -447,9 +504,26 @@ ${neighbors.map(n => {
 
 #### 3. Legal Status
 - Account frozen request pending under BNSS Section 193.`;
+    }
   } else if (node.type === "Object") {
     const attrs = node.attrs || {};
-    body = `### Forensic Asset File: ${node.label} (${node.id})
+    if (isKannada) {
+      body = `### ವಿಧಿವಿಜ್ಞಾನ ಆಸ್ತಿ ಫೈಲ್: ${node.label} (${node.id})
+- **ವರ್ಗ**: ${attrs.category === "Vehicle" ? "ವಾಹನ" : attrs.category || "ವಾಹನ"}
+- **ನಂಬರ್ ಪ್ಲೇಟ್ / ಸೀರಿಯಲ್ / IMEI**: ${attrs.imei_or_plate || "N/A"}
+- **ಮರುಪಡೆಯುವಿಕೆ ಸ್ಥಿತಿ**: **${attrs.recovery_status === "Active" ? "ಸಕ್ರಿಯ" : attrs.recovery_status === "Seized" ? "ಜಪ್ತಿ ಮಾಡಲಾಗಿದೆ" : attrs.recovery_status || "ಸಕ್ರಿಯ"}**
+- **ಹ್ಯೂರಿಸ್ಟಿಕ್ ವಿಶ್ವಾಸಾರ್ಹತೆ**: ${((attrs.confidence || 0.85) * 100).toFixed(0)}%
+
+#### 1. ಕಸ್ಟಡಿ ಮತ್ತು ಸಂಪರ್ಕಗಳ ಸರಪಳಿ
+${neighbors.map(n => {
+  const otherLabel = n.entity && typeof n.entity === 'object' && n.entity.label ? n.entity.label : n.entity;
+  return `- **${n.relationship}** ನೊಂದಿಗೆ ಲಿಂಕ್ ಮಾಡಲಾಗಿದೆ **${otherLabel}**`;
+}).join("\n")}
+
+#### 2. ತನಿಖಾ ಮೌಲ್ಯ
+ಈ ಆಸ್ತಿಯು ಅಪರಾಧ ಸಂಚಿನ ಪ್ರಾದೇಶಿಕ ಮತ್ತು ಭೌತಿಕ ಪುರಾವೆಯನ್ನು ಒದಗಿಸುತ್ತದೆ. ನಿರ್ಣಾಯಕ ಅವಧಿಗಳಲ್ಲಿ ಸಾರಿಗೆ ಕಾರಿಡಾರ್‌ಗಳ ಸಮಯದಲ್ಲಿ ಬಳಸಲಾಗುತ್ತದೆ.`;
+    } else {
+      body = `### Forensic Asset File: ${node.label} (${node.id})
 - **Category**: ${attrs.category || "Vehicle"}
 - **Plate / Serial / IMEI**: ${attrs.imei_or_plate || "N/A"}
 - **Recovery Status**: **${attrs.recovery_status || "Active"}**
@@ -463,9 +537,28 @@ ${neighbors.map(n => {
 
 #### 2. Investigative Value
 This asset provides direct spatial and physical grounding of the crime conspiracy. Used during transit corridors during critical periods.`;
+    }
   } else if (node.type === "Location") {
     const attrs = node.attrs || {};
-    body = `### Geographic Location Profile: ${node.label} (${node.id})
+    if (isKannada) {
+      body = `### ಭೌಗೋಳಿಕ ಸ್ಥಳ ಪ್ರೊಫೈಲ್: ${node.label} (${node.id})
+- **ಜಿಲ್ಲಾ ವಲಯ**: ${attrs.district_code || "BLR-SOUTH"}
+- **GIS ನಿರ್ದೇಶಾಂಕಗಳು**: ${attrs.gis || "N/A"}
+- **ನಗರೀಕರಣ ಸೂಚ್ಯಂಕ**: ${attrs.urbanization_index || "ಹೆಚ್ಚು"}
+- **ಆರ್ಥಿಕ ಒತ್ತಡ**: ${attrs.economic_stress_level || "ಮಧ್ಯಮ"}
+
+#### 1. ಘಟನೆಗಳ ಸಾಂದ್ರತೆ ಮತ್ತು ಈವೆಂಟ್‌ಗಳು
+ಈ ಸ್ಥಳವು ${neighbors.length} ಸಕ್ರಿಯ ಶಂಕಿತರು ಅಥವಾ ಘಟನೆಗಳೊಂದಿಗೆ ಅತಿಕ್ರಮಿಸುತ್ತದೆ.
+${neighbors.map(n => {
+  const otherLabel = n.entity && typeof n.entity === 'object' && n.entity.label ? n.entity.label : n.entity;
+  return `- ನೇರ **${n.relationship}** ಸಂಬಂಧ **${otherLabel}** ನೊಂದಿಗೆ`;
+}).join("\n")}
+
+#### 2. ಗಸ್ತು ಕಮಾಂಡ್ ಯೋಜನೆ
+- ನಗರೀಕರಣ ವಲಯಗಳಲ್ಲಿ ಬೀಟ್ ಗಸ್ತು ಆವರ್ತನವನ್ನು ಹೆಚ್ಚಿಸಿ.
+- ಕ್ಯಾಮೆರಾ ಫೀಡ್ ಹೊಂದಾಣಿಕೆಗಾಗಿ ಪುರಸಭೆಯ ಕಣ್ಗಾವಲುಗಳೊಂದಿಗೆ ಸಮನ್ವಯಗೊಳಿಸಿ.`;
+    } else {
+      body = `### Geographic Location Profile: ${node.label} (${node.id})
 - **District Area**: ${attrs.district_code || "BLR-SOUTH"}
 - **GIS Coordinates**: ${attrs.gis || "N/A"}
 - **Urbanization Index**: ${attrs.urbanization_index || "High"}
@@ -481,10 +574,32 @@ ${neighbors.map(n => {
 #### 2. Patrol Command Plan
 - Increase frequency of beat patrolling in high urbanization grids.
 - Coordinate with municipal surveillance for camera feed alignment.`;
+    }
   } else {
     // Event/Default
     const attrs = node.attrs || {};
-    body = `### Judicial Case Event: ${node.label} (${node.id})
+    if (isKannada) {
+      body = `### ನ್ಯಾಯಾಂಗ ಪ್ರಕರಣದ ಈವೆಂಟ್: ${node.label} (${node.id})
+- **ಶಾಸನಬದ್ಧ ವರ್ಗೀಕರಣ**: ${attrs.classification || "ತನಿಖೆಯಲ್ಲಿದೆ"}
+- **ಸ್ಥಿತಿ**: ${attrs.status || "N/A"}
+- **ನೋಂದಾಯಿತ ದಿನಾಂಕ**: ${attrs.filed || "N/A"}
+- **ಸಮಯದ ವಿಂಡೋ**: ಘಟನೆಯ ನಂತರ ${attrs.timeline_days_since_incident || 0} ದಿನಗಳು ಕಳೆದಿವೆ.
+
+#### 1. ಶಾಸನಬದ್ಧ ಗಡುವುಗಳು (BNSS 193)
+- **ಚಾರ್ಜ್‌ಶೀಟ್ ಬಾಕಿ**: ${attrs.chargesheet_deadline_days || 90} ದಿನಗಳ ಮಿತಿ.
+- **ಪ್ರಸ್ತುತ ಸ್ಥಿತಿ**: **${attrs.chargesheet_status || "ಕರಡು ತಯಾರಿಕೆ"}**
+
+#### 2. ವಿಧಿವಿಜ್ಞಾನ ಸ್ಥಿತಿ ಮತ್ತು ಕಡ್ಡಾಯಗಳು
+- **ಕಡ್ಡಾಯ ವಿಧಿವಿಜ್ಞಾನ**: ${attrs.mandatory_forensics ? "ಹೌದು" : "ಇಲ್ಲ"}
+- **ಇ-ಫೋರೆನ್ಸಿಕ್ಸ್ ಅಪ್‌ಲೋಡ್ ಸ್ಥಿತಿ**: ${attrs.forensics_status || "ಪೂರ್ಣಗೊಂಡಿದೆ"}
+
+#### 3. ಕೋರ್ ಸಂಪರ್ಕಗಳು
+${neighbors.map(n => {
+  const otherLabel = n.entity && typeof n.entity === 'object' && n.entity.label ? n.entity.label : n.entity;
+  return `- ಅಸೋಸಿಯೇಟೆಡ್ **${n.relationship}** **${otherLabel}** ನೊಂದಿಗೆ`;
+}).join("\n")}`;
+    } else {
+      body = `### Judicial Case Event: ${node.label} (${node.id})
 - **Statutory Classification**: ${attrs.classification || "Under Investigation"}
 - **Status**: ${attrs.status || "N/A"}
 - **Date Registered**: ${attrs.filed || "N/A"}
@@ -503,9 +618,10 @@ ${neighbors.map(n => {
   const otherLabel = n.entity && typeof n.entity === 'object' && n.entity.label ? n.entity.label : n.entity;
   return `- Associated **${n.relationship}** with **${otherLabel}**`;
 }).join("\n")}`;
+    }
   }
 
-  return `**[SYSTEM NOTICE: High-Quality Heuristics Offline Engine]**\n\n` + body;
+  return (isKannada ? `**[ಸಿಸ್ಟಮ್ ಸೂಚನೆ: ಉತ್ತಮ-ಗುಣಮಟ್ಟದ ಹ್ಯೂರಿಸ್ಟಿಕ್ಸ್ ಆಫ್‌ಲೈನ್ ಎಂಜಿನ್]**\n\n` : `**[SYSTEM NOTICE: High-Quality Heuristics Offline Engine]**\n\n`) + body;
 }
 
 // ----------------- API ROUTE 1: Chatbot (English & Kannada) -----------------
@@ -597,7 +713,8 @@ Structure your output as follows:
 
 // ----------------- API ROUTE 2: Case Summarization -----------------
 app.post("/api/summarize-case", async (req, res) => {
-  const { entityId, role } = req.body;
+  const { entityId, role, language } = req.body;
+  const currentLang = language || "English";
   const userRole = role || "Investigator";
 
   const node = mockPOLEData.nodes.find(n => n.id === entityId);
@@ -633,6 +750,8 @@ app.post("/api/summarize-case", async (req, res) => {
 ENTITY: ${JSON.stringify(node, null, 2)}
 CONNECTIONS: ${JSON.stringify(neighbors, null, 2)}
 
+You must respond in ${currentLang}. If the language is Kannada, use fluent Kannada script. If English, use professional law-enforcement English.
+
 Provide the response in structured markdown with:
 1. **Executive Summary**: Brief of who/what this is, their criminal classification, and structural risk score.
 2. **Behavioral Profile (Criminological MO)**: Analysis of their modus operandi (MO), crime history, and association network.
@@ -644,7 +763,7 @@ Provide the response in structured markdown with:
     const ai = getAiClient();
     if (!ai) {
       // Fallback deterministic brief when API key is missing
-      const summary = generateOfflineSummary(node, neighbors);
+      const summary = generateOfflineSummary(node, neighbors, currentLang);
       return res.json({ summary, offline: true });
     }
 
@@ -666,14 +785,16 @@ Provide the response in structured markdown with:
       console.info("Info: Summarizer switched to offline summary mode:", error.message || error);
     }
     
-    const summary = generateOfflineSummary(node, neighbors);
+    const summary = generateOfflineSummary(node, neighbors, currentLang);
     res.json({ summary, offline: true, quotaExceeded: isQuota });
   }
 });
 
 // ----------------- API ROUTE 3: Similar Past Cases -----------------
 app.post("/api/get-similar-cases", async (req, res) => {
-  const { entityId, role } = req.body;
+  const { entityId, role, language } = req.body;
+  const currentLang = language || "English";
+  const isKannada = currentLang === "Kannada";
   const userRole = role || "Investigator";
 
   const node = mockPOLEData.nodes.find(n => n.id === entityId);
@@ -698,6 +819,8 @@ app.post("/api/get-similar-cases", async (req, res) => {
 ACTIVE NODE: ${JSON.stringify(node, null, 2)}
 HISTORICAL ARCHIVES: ${JSON.stringify(historicalCases, null, 2)}
 
+You must return the text in ${currentLang}. If the language is Kannada, use fluent Kannada script for the matchedMOText and leadsRecommended keys. If English, use professional law-enforcement English.
+
 Calculate a multidimensional similarity score based on:
 1. Modus Operandi Similarity (0% to 100%)
 2. Spatial & Geographic Proximity (0% to 100%)
@@ -719,19 +842,48 @@ Return ONLY valid JSON array and nothing else. No markdown wrappers.`;
     return historicalCases.map(hc => {
       const isManjunathMatch = node.id === 'P-001' && hc.accused.includes("Manjunath");
       const isSureshaMatch = node.id === 'P-002' && hc.accused.includes("Suresha");
-      return {
-        caseId: hc.id,
-        title: hc.title,
-        classification: hc.classification,
-        moSimilarity: isManjunathMatch ? 94 : isSureshaMatch ? 88 : 45,
-        spatialProximity: hc.title.includes("Koramangala") ? 85 : 78,
-        networkOverlap: isManjunathMatch || isSureshaMatch ? 90 : 25,
-        matchedMOText: isManjunathMatch 
+      
+      const title = isKannada
+        ? (hc.id === 'M-812' ? "ಕೋರಮಂಗಲ ಠಾಣೆ ಮನೆಗಳ್ಳತನ ಪ್ರಕರಣ" : "ಜಯನಗರ ವಾಣಿಜ್ಯ ಸೇಫ್ ಬ್ರೇಕಿಂಗ್")
+        : hc.title;
+        
+      const classification = isKannada
+        ? (hc.classification === "Burglary" ? "ಮನೆಗಳ್ಳತನ" : hc.classification)
+        : hc.classification;
+
+      let matchedMOText = "";
+      let leadsRecommended = "";
+
+      if (isKannada) {
+        matchedMOText = isManjunathMatch 
+          ? "ಹೆಚ್ಚಿನ ಅಪರಾಧ ಪುನರಾವರ್ತನೆಯನ್ನು ಸ್ಥಾಪಿಸುವ ನಿಖರವಾದ ಹೊಂದಾಣಿಕೆ ಸಹಿ: ರಾತ್ರಿಯ ಬಲವಂತದ ಪ್ರವೇಶ, ಕಾಗದದ ಬಳಕೆ ಮತ್ತು ಸೆಲ್ ಟವರ್ ಕಾರಿಡಾರ್ ಒಮ್ಮುಖ ಹೊಂದಾಣಿಕೆ."
+          : isSureshaMatch
+            ? "ಫೆನ್ಸಿಂಗ್ ಮಾದರಿಗಳು, ಐಎಂಇಐ ಬದಲಾವಣೆಗಳು ಮತ್ತು ಎಲೆಕ್ಟ್ರಾನಿಕ್ಸ್ ಮಾರ್ಪಾಡು ವಿಧಾನಗಳು ಬಿಟಿಎಂ ಲೇಔಟ್‌ನ ಮುಂಚಿನ ಎಲೆಕ್ಟ್ರಾನಿಕ್ಸ್ ಅಂಗಡಿಯ ಸ್ಥಾಪನೆಗೆ ಹೊಂದಿಕೆಯಾಗುತ್ತವೆ."
+            : "ದಕ್ಷಿಣ ವಿಭಾಗದ ಪ್ರದೇಶಗಳಲ್ಲಿ ರಾತ್ರಿ ವೇಳೆ ಮನೆಗಳ್ಳತನಗಳ ಸಾಮಾನ್ಯ ತನಿಖಾ ಹೋಲಿಕೆ.";
+        
+        leadsRecommended = isManjunathMatch
+          ? "ಬಿಟಿಎಂ ಲೇಔಟ್ ಸೇಫ್‌ಹೌಸ್ ಮೇಲೆ ದಾಳಿ ನಡೆಸಿ ಶಂಕಿತ ಮಂಜುನಾಥ್‌ನನ್ನು ತಕ್ಷಣವೇ ವಶಕ್ಕೆ ಪಡೆಯಿರಿ."
+          : isSureshaMatch
+            ? "ಬಿಟಿಎಂ ಲೇಔಟ್‌ನಲ್ಲಿರುವ ಸುರೇಶ್ ಅವರ ಮೊಬೈಲ್ ರಿಪೇರಿ ಅಂಗಡಿಯನ್ನು ತಪಾಸಣೆ ಮಾಡಿ ಮತ್ತು ದಾಸ್ತಾನು ಪರಿಶೀಲಿಸಿ."
+            : "ರಾತ್ರಿ ವೇಳೆ ಗಸ್ತನ್ನು ಹೆಚ್ಚಿಸಿ ಮತ್ತು ಆಯಕಟ್ಟಿನ ಸ್ಥಳಗಳಲ್ಲಿ ಸಿಸಿಟಿವಿ ದೃಶ್ಯಾವಳಿಗಳನ್ನು ಪರಿಶೀಲಿಸಿ.";
+      } else {
+        matchedMOText = isManjunathMatch 
           ? "Exact matching signature establishing high MO recidivism: nighttime forced entry, crowbar usage, and matching cell tower corridor convergence."
           : isSureshaMatch
             ? "Fencing patterns, IMEI rewrites, and electronics Alteration methods match K. Suresha's previous BTM Layout electronics hub setup."
-            : "General procedural match of night-time burglaries and resale targeting properties in BLR South Division.",
-        leadsRecommended: hc.leads_recommended
+            : "General procedural match of night-time burglaries and resale targeting properties in BLR South Division.";
+        leadsRecommended = hc.leads_recommended;
+      }
+
+      return {
+        caseId: hc.id,
+        title,
+        classification,
+        moSimilarity: isManjunathMatch ? 94 : isSureshaMatch ? 88 : 45,
+        spatialProximity: hc.title.includes("Koramangala") ? 85 : 78,
+        networkOverlap: isManjunathMatch || isSureshaMatch ? 90 : 25,
+        matchedMOText,
+        leadsRecommended
       };
     });
   };
