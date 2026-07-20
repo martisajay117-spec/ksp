@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Network, TrendingUp, Users, Coins, Zap, Shield, 
   HelpCircle, RefreshCw, FileText, Search, BookOpen, Clock, AlertTriangle, Play, Sparkles,
@@ -48,9 +48,17 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [loginEmail, setLoginEmail] = useState<string>("martisajay117@gmail.com");
   const [loginPassword, setLoginPassword] = useState<string>("");
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const [tempTheme, setTempTheme] = useState<"dark" | "light">("dark");
+  const [theme, setTheme] = useState<"dark" | "light">("light");
+  const [tempTheme, setTempTheme] = useState<"dark" | "light">("light");
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [gatewayStep, setGatewayStep] = useState<1 | 2>(1);
+
+  // CCTNS FIR Search Access Gateway States
+  const [searchDistrict, setSearchDistrict] = useState<string>("");
+  const [searchStation, setSearchStation] = useState<string>("");
+  const [searchYear, setSearchYear] = useState<string>("2026");
+  const [searchFirNumber, setSearchFirNumber] = useState<string>("");
+  const [captchaInput, setCaptchaInput] = useState<string>("");
 
   // Graph Algorithm States
   const [activeAlgo, setActiveAlgo] = useState<"core" | "between" | "community" | null>(null);
@@ -170,170 +178,224 @@ export default function App() {
   }).length;
 
   if (!isLoggedIn) {
-    return (
-      <div className="h-screen w-screen bg-[#0D0D0D] flex items-center justify-center p-4 font-sans select-none overflow-hidden relative">
-        {/* Animated matrix scanline overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] pointer-events-none opacity-40"></div>
-        
-        {/* Background ambient red circle glow */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#E53935]/5 blur-[120px] pointer-events-none"></div>
+    // Dynamic police station list based on selected district
+    let availableStations: string[] = [];
+    if (searchDistrict === "Bengaluru South Division") {
+      availableStations = ["Jayanagar PS (Unit-1044)"];
+    } else if (searchDistrict === "Bengaluru East Division") {
+      availableStations = ["Whitefield IT Corridor PS (Unit-1280)"];
+    } else if (searchDistrict === "Bengaluru Central Division") {
+      availableStations = ["Seshadripuram PS (Unit-3044)"];
+    }
 
-        {/* Access Gateway Card */}
-        <div className="w-full max-w-md bg-[#161616] border-2 border-[#E53935]/40 rounded-lg p-8 shadow-2xl relative z-10 space-y-6">
+    const handleSubmitSearch = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!searchDistrict) {
+        setLoginError("Please select District / Division.");
+        return;
+      }
+      if (!searchStation) {
+        setLoginError("Please select Police Station.");
+        return;
+      }
+      if (!searchYear) {
+        setLoginError("Please select Year.");
+        return;
+      }
+      if (!searchFirNumber.trim()) {
+        setLoginError("Please enter FIR Number.");
+        return;
+      }
+      if (captchaInput.trim().toUpperCase() !== "DIXHX") {
+        setLoginError("Invalid Security Code (CAPTCHA). Please enter 'DIXHX'.");
+        return;
+      }
+
+      // Success! Map to active case target
+      setLoginError(null);
+      if (searchDistrict === "Bengaluru South Division") {
+        setSelectedCaseId("jayanagar");
+      } else if (searchDistrict === "Bengaluru East Division") {
+        setSelectedCaseId("whitefield");
+      } else if (searchDistrict === "Bengaluru Central Division") {
+        setSelectedCaseId("seshadripuram");
+      } else {
+        setSelectedCaseId("jayanagar");
+      }
+      setIsLoggedIn(true);
+    };
+
+    return (
+      <div className="h-screen w-screen bg-[#F8FAFC] flex items-center justify-center p-4 font-sans select-none overflow-y-auto relative">
+        {/* Ambient background styling */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(241,245,249,0)_50%,rgba(15,23,42,0.02)_50%),linear-gradient(90deg,rgba(59,130,246,0.02),rgba(0,0,0,0),rgba(59,130,246,0.02))] bg-[length:100%_4px,3px_100%] pointer-events-none opacity-40"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-blue-600/5 blur-[120px] pointer-events-none"></div>
+
+        {/* Centered Form Card */}
+        <div className="w-full max-w-md bg-white border border-slate-200 rounded-xl p-8 shadow-xl relative z-10 space-y-6">
           <div className="text-center space-y-2">
-            <div className="inline-flex w-12 h-12 rounded bg-[#111111] border-2 border-[#E53935] items-center justify-center font-bold text-xl text-[#E53935] font-mono shadow-inner">
-              KSP
+            <div className="inline-flex w-20 h-20 rounded-full bg-slate-50 border border-slate-200 items-center justify-center p-2.5 shadow-inner mb-1">
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/a/aa/Seal_of_Karnataka.svg" 
+                alt="Government of Karnataka Emblem" 
+                className="w-full h-full object-contain filter drop-shadow-[0_2px_8px_rgba(59,130,246,0.15)]"
+                referrerPolicy="no-referrer"
+              />
             </div>
             <div>
-              <span className="text-[10px] font-mono font-bold text-[#E53935] tracking-[0.2em] uppercase block">
-                MHA Secure Access Portal
+              <span className="text-[10px] font-mono font-bold text-blue-600 tracking-[0.25em] uppercase block">
+                CCTNS PORTAL GATEWAY
               </span>
-              <h2 className="text-base font-bold text-[#E0E0E0] uppercase tracking-wider mt-1">
-                Karnataka State Police Terminal
+              <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider mt-1">
+                Karnataka State Police
               </h2>
-              <p className="text-[10px] font-mono text-[#888888]">
-                Centralized POLE Docket & Auditing Environment
+              <p className="text-[10px] font-mono text-slate-500 mt-0.5">
+                Centralized FIR Search & Docket Access
               </p>
             </div>
           </div>
 
-          <form 
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!loginEmail.trim() || !loginPassword.trim()) {
-                setLoginError("Registered Email and Security Password are required.");
-                return;
-              }
-              // Simulate credential verification
-              setLoginError(null);
-              setTheme(tempTheme);
-              setIsLoggedIn(true);
-            }}
-            className="space-y-4"
-          >
+          <form onSubmit={handleSubmitSearch} className="space-y-4">
             {loginError && (
-              <div className="bg-[#E53935]/10 border border-[#E53935]/30 rounded p-3 text-[11px] font-mono text-[#E53935] flex items-center gap-2">
+              <div className="bg-red-50 border border-red-200 rounded p-3 text-[11px] font-mono text-red-600 flex items-center gap-2">
                 <AlertTriangle size={14} className="shrink-0" />
                 <span>{loginError}</span>
               </div>
             )}
 
-            {/* Stage 1: Credentials */}
-            <div className="space-y-3.5">
-              <span className="text-[10px] font-mono font-bold text-[#888888] uppercase tracking-wider block border-b border-[#333333] pb-1">
-                01. SECURE ACCESS CREDENTIALS
-              </span>
+            {/* Vertical Stacking: Input fields in single-column */}
+            <div className="space-y-4">
               
-              <div className="space-y-2.5">
+              {/* District Dropdown */}
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-mono font-semibold text-slate-600">
+                  Select District <span className="text-red-500 font-bold">*</span>
+                </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-2.5 h-4 w-4 text-[#888888]" />
-                  <input
-                    type="email"
-                    placeholder="Registered Operator Email"
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                    className="w-full bg-[#111111] border border-[#333333] focus:border-[#E53935] rounded pl-10 pr-3 py-2 text-xs font-mono text-[#E0E0E0] outline-none transition-colors"
-                  />
-                </div>
-
-                <div className="relative">
-                  <Lock className="absolute left-3 top-2.5 h-4 w-4 text-[#888888]" />
-                  <input
-                    type="password"
-                    placeholder="Terminal Security Password"
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    className="w-full bg-[#111111] border border-[#333333] focus:border-[#E53935] rounded pl-10 pr-3 py-2 text-xs font-mono text-[#E0E0E0] outline-none transition-colors"
-                  />
+                  <select
+                    value={searchDistrict}
+                    onChange={(e) => {
+                      setSearchDistrict(e.target.value);
+                      setSearchStation(""); // Reset station on district change
+                    }}
+                    className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 rounded px-3 py-2 text-xs font-mono text-slate-800 outline-none transition-colors cursor-pointer appearance-none"
+                  >
+                    <option value="">Select District / Division</option>
+                    <option value="Bengaluru South Division">Bengaluru South Division</option>
+                    <option value="Bengaluru East Division">Bengaluru East Division</option>
+                    <option value="Bengaluru Central Division">Bengaluru Central Division</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-500">
+                    <ChevronRight size={14} className="rotate-90 text-slate-500" />
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Stage 2: Theme selection */}
-            <div className="space-y-3 pt-2">
-              <span className="text-[10px] font-mono font-bold text-[#888888] uppercase tracking-wider block border-b border-[#333333] pb-1">
-                02. TERMINAL VISUAL ENVIRONMENT
-              </span>
-              
-              <div className="grid grid-cols-2 gap-3">
-                {/* Dark option */}
-                <button
-                  type="button"
-                  onClick={() => setTempTheme("dark")}
-                  className={`p-3 rounded border text-left flex flex-col justify-between transition-all cursor-pointer ${
-                    tempTheme === "dark" 
-                      ? "bg-[#E53935]/10 border-[#E53935] text-white" 
-                      : "bg-[#111111] border-[#333333] text-[#888888] hover:border-[#555555]"
-                  }`}
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <Moon size={15} className={tempTheme === "dark" ? "text-[#E53935]" : "text-[#888888]"} />
-                    <span className={`w-2 h-2 rounded-full ${tempTheme === "dark" ? "bg-[#E53935]" : "bg-transparent"}`}></span>
-                  </div>
-                  <div className="mt-3">
-                    <span className="text-xs font-bold block">Dark Terminal</span>
-                    <span className="text-[9px] text-[#888888] mt-0.5 block font-mono">Recommended night theme</span>
-                  </div>
-                </button>
-
-                {/* Light option */}
-                <button
-                  type="button"
-                  onClick={() => setTempTheme("light")}
-                  className={`p-3 rounded border text-left flex flex-col justify-between transition-all cursor-pointer ${
-                    tempTheme === "light" 
-                      ? "bg-[#D69A4E]/10 border-[#D69A4E] text-white" 
-                      : "bg-[#111111] border-[#333333] text-[#888888] hover:border-[#555555]"
-                  }`}
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <Sun size={15} className={tempTheme === "light" ? "text-[#D69A4E]" : "text-[#888888]"} />
-                    <span className={`w-2 h-2 rounded-full ${tempTheme === "light" ? "bg-[#D69A4E]" : "bg-transparent"}`}></span>
-                  </div>
-                  <div className="mt-3">
-                    <span className="text-xs font-bold block">Light Tactical</span>
-                    <span className="text-[9px] text-[#888888] mt-0.5 block font-mono">High contrast sunlight view</span>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            {/* Stage 3: Case selection */}
-            <div className="space-y-3 pt-4">
-              <span className="text-[10px] font-mono font-bold text-[#888888] uppercase tracking-wider block border-b border-[#333333] pb-1">
-                03. ACTIVE CASE TARGET
-              </span>
-              
-              <div className="relative">
-                <Compass className="absolute left-3 top-2.5 h-4 w-4 text-[#E53935]" />
-                <select
-                  value={selectedCaseId}
-                  onChange={(e) => setSelectedCaseId(e.target.value)}
-                  className="w-full bg-[#111111] border border-[#333333] focus:border-[#E53935] rounded pl-10 pr-3 py-2 text-xs font-mono text-[#E0E0E0] outline-none transition-colors cursor-pointer appearance-none"
-                >
-                  {Object.values(casesData).map((c) => (
-                    <option key={c.id} value={c.id}>
-                      🚨 [{c.status.toUpperCase()}] {c.title}
+              {/* Police Station Dropdown */}
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-mono font-semibold text-slate-600">
+                  Select Police Station <span className="text-red-500 font-bold">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={searchStation}
+                    onChange={(e) => setSearchStation(e.target.value)}
+                    disabled={!searchDistrict}
+                    className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 rounded px-3 py-2 text-xs font-mono text-slate-800 outline-none transition-colors cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="">
+                      {searchDistrict ? "Select Police Station" : "Select District first"}
                     </option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
-                  <ChevronRight size={14} className="rotate-90 text-[#888888]" />
+                    {availableStations.map((station) => (
+                      <option key={station} value={station}>
+                        {station}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-500">
+                    <ChevronRight size={14} className="rotate-90 text-slate-500" />
+                  </div>
                 </div>
               </div>
+
+              {/* Select Year Dropdown */}
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-mono font-semibold text-slate-600">
+                  Select Year <span className="text-red-500 font-bold">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={searchYear}
+                    onChange={(e) => setSearchYear(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 rounded px-3 py-2 text-xs font-mono text-slate-800 outline-none transition-colors cursor-pointer appearance-none"
+                  >
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-500">
+                    <ChevronRight size={14} className="rotate-90 text-slate-500" />
+                  </div>
+                </div>
+              </div>
+
+              {/* FIR Number Text Input */}
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-mono font-semibold text-slate-600">
+                  FIR Number <span className="text-red-500 font-bold">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="ex : 0124"
+                  value={searchFirNumber}
+                  onChange={(e) => setSearchFirNumber(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 rounded px-3 py-2 text-xs font-mono text-slate-800 outline-none transition-colors"
+                />
+              </div>
+
+              {/* Security CAPTCHA section */}
+              <div className="space-y-3 pt-2">
+                <label className="block text-[11px] font-mono font-semibold text-slate-600">
+                  Security Check <span className="text-red-500 font-bold">*</span>
+                </label>
+                
+                {/* Image-based Security Challenge Box */}
+                <div className="bg-slate-100 border border-slate-200 rounded-lg py-3 flex items-center justify-center relative overflow-hidden shadow-inner">
+                  {/* Styled security noise lines overlay */}
+                  <div className="absolute inset-0 pointer-events-none opacity-20">
+                    <div className="w-full h-full bg-[repeating-linear-gradient(45deg,#ccc,#ccc_10px,#fff_10px,#fff_20px)] opacity-15"></div>
+                    <div className="absolute top-2 left-0 right-0 h-0.5 bg-red-400 rotate-6"></div>
+                    <div className="absolute top-6 left-0 right-0 h-0.5 bg-blue-400 -rotate-3"></div>
+                    <div className="absolute top-4 left-0 right-0 h-0.5 bg-green-400 rotate-12"></div>
+                  </div>
+                  <span className="text-lg font-mono font-extrabold tracking-[0.4em] text-slate-700 select-none px-4 py-1 border-2 border-dashed border-slate-300 rounded bg-white skew-x-12">
+                    DIXHX
+                  </span>
+                </div>
+
+                {/* Enter Captcha verification field */}
+                <input
+                  type="text"
+                  placeholder="Enter Captcha"
+                  value={captchaInput}
+                  onChange={(e) => setCaptchaInput(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 rounded px-3 py-2 text-xs font-mono text-slate-800 outline-none transition-colors uppercase placeholder:normal-case"
+                />
+              </div>
+
             </div>
 
-            {/* Launch button */}
+            {/* CTA Submit Button */}
             <button
               type="submit"
-              className="w-full bg-[#E53935] hover:bg-[#c62828] text-white font-mono font-bold text-xs uppercase tracking-wider py-2.5 rounded transition-colors shadow-lg shadow-[#E53935]/25 flex items-center justify-center gap-2 cursor-pointer mt-6"
+              className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-mono font-bold text-xs uppercase tracking-wider py-2.5 rounded transition-colors shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 cursor-pointer mt-6"
             >
-              <Shield size={14} /> Establish Secure Connection
+              <Search size={14} /> Submit
             </button>
           </form>
 
-          <div className="text-center font-mono text-[9px] text-[#555555]">
-            Authorized Access Only · IP Logged · Karnataka State IT Act
+          <div className="text-center font-mono text-[9px] text-slate-400 pt-2">
+            Authorized Public & Official CCTNS Access · IP Logged · Karnataka IT Act
           </div>
         </div>
       </div>
@@ -346,8 +408,14 @@ export default function App() {
       {/* Top Banner Header */}
       <header className="bg-[#111111] border-b-2 border-[#333333] px-8 py-4 flex flex-wrap justify-between items-center gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded bg-[#1A1A1A] border-2 border-[#E53935] flex items-center justify-center font-bold text-lg text-[#E53935] font-mono">
-            K
+          <div className="w-[51px] h-[42px] rounded bg-white border border-slate-200 flex items-center justify-center p-0.5 shadow-inner shrink-0">
+            <img 
+              src="https://upload.wikimedia.org/wikipedia/commons/a/aa/Seal_of_Karnataka.svg" 
+              alt="Government of Karnataka Emblem" 
+              className="object-contain"
+              style={{ height: '42px', width: '51px' }}
+              referrerPolicy="no-referrer"
+            />
           </div>
           <div>
             <div className="flex items-center gap-2">
