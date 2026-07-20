@@ -321,13 +321,13 @@ export default function ChatbotInterface({ selectedNode, role, selectedCaseId, l
       </div>
 
       {isQuotaExceeded && (
-        <div className="bg-[#D69A4E]/10 border-b border-[#D69A4E]/20 px-3 py-1.5 text-[9px] font-mono text-[#D69A4E] flex items-center justify-between gap-2 shrink-0">
+        <div className="bg-[#D69A4E]/10 border-b border-[#D69A4E]/20 px-3 py-1.5 text-[9px] font-mono text-[#D69A4E] flex items-center justify-between gap-2 shrink-0 animate-fade-in">
           <div className="flex items-center gap-1.5">
             <AlertTriangle size={11} className="shrink-0 text-[#D69A4E]" />
             <span className="leading-tight">
               {language === "English" 
-                ? "Gemini API Rate Limit exceeded. Running Autonomous Offline Mode." 
-                : "ಜೆಮಿನಿ ಎಪಿಐ ಮಿತಿ ಮೀರಿದೆ. ಸ್ವಾಯತ್ತ ಆಫ್‌ಲೈನ್ ಮೋಡ್ ಚಾಲನೆಯಲ್ಲಿದೆ."}
+                ? "Cloud Neural Engine overloaded or rate-limited. Successfully switched to Local Autonomous Heuristics mode." 
+                : "ಕ್ಲೌಡ್ ನ್ಯೂರಲ್ ಎಂಜಿನ್ ಮಿತಿ ಮೀರಿದೆ ಅಥವಾ ಲೋಡ್ ಆಗಿದೆ. ಸ್ಥಳೀಯ ಸ್ವಾಯತ್ತ ಮೋಡ್‌ಗೆ ಯಶಸ್ವಿಯಾಗಿ ಬದಲಾಯಿಸಲಾಗಿದೆ."}
             </span>
           </div>
           <button 

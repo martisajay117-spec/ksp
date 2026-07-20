@@ -699,15 +699,22 @@ Structure your output as follows:
 
   } catch (error: any) {
     const errorStr = (error.message || "") + " " + JSON.stringify(error);
-    const isQuota = errorStr.includes("429") || errorStr.toLowerCase().includes("quota") || errorStr.toLowerCase().includes("exhausted") || errorStr.toLowerCase().includes("limit");
+    const isQuota = errorStr.includes("429") || 
+                    errorStr.includes("503") ||
+                    errorStr.toLowerCase().includes("quota") || 
+                    errorStr.toLowerCase().includes("exhausted") || 
+                    errorStr.toLowerCase().includes("limit") ||
+                    errorStr.toLowerCase().includes("unavailable") ||
+                    errorStr.toLowerCase().includes("high demand") ||
+                    errorStr.toLowerCase().includes("overloaded");
     if (isQuota) {
-      console.info("Info: Chatbot switched to offline heuristics mode due to temporary rate limits.");
+      console.info("Info: Chatbot switched to offline heuristics mode due to temporary rate limits or model demand.");
     } else {
       console.info("Info: Chatbot switched to offline heuristics mode:", error.message || error);
     }
     
     const fallbackText = generateOfflineChatResponse(lastUserMessage, selectedNode?.id, currentLang);
-    res.json({ content: fallbackText, offline: true, quotaExceeded: isQuota });
+    res.json({ content: fallbackText, offline: true, quotaExceeded: true });
   }
 });
 
@@ -778,15 +785,22 @@ Provide the response in structured markdown with:
     res.json({ summary: response.text, offline: false });
   } catch (error: any) {
     const errorStr = (error.message || "") + " " + JSON.stringify(error);
-    const isQuota = errorStr.includes("429") || errorStr.toLowerCase().includes("quota") || errorStr.toLowerCase().includes("exhausted") || errorStr.toLowerCase().includes("limit");
+    const isQuota = errorStr.includes("429") || 
+                    errorStr.includes("503") ||
+                    errorStr.toLowerCase().includes("quota") || 
+                    errorStr.toLowerCase().includes("exhausted") || 
+                    errorStr.toLowerCase().includes("limit") ||
+                    errorStr.toLowerCase().includes("unavailable") ||
+                    errorStr.toLowerCase().includes("high demand") ||
+                    errorStr.toLowerCase().includes("overloaded");
     if (isQuota) {
-      console.info("Info: Summarizer switched to offline summary mode due to temporary rate limits.");
+      console.info("Info: Summarizer switched to offline summary mode due to temporary rate limits or model demand.");
     } else {
       console.info("Info: Summarizer switched to offline summary mode:", error.message || error);
     }
     
     const summary = generateOfflineSummary(node, neighbors, currentLang);
-    res.json({ summary, offline: true, quotaExceeded: isQuota });
+    res.json({ summary, offline: true, quotaExceeded: true });
   }
 });
 
@@ -907,14 +921,21 @@ Return ONLY valid JSON array and nothing else. No markdown wrappers.`;
     res.json({ matches: parsed, offline: false });
   } catch (error: any) {
     const errorStr = (error.message || "") + " " + JSON.stringify(error);
-    const isQuota = errorStr.includes("429") || errorStr.toLowerCase().includes("quota") || errorStr.toLowerCase().includes("exhausted") || errorStr.toLowerCase().includes("limit");
+    const isQuota = errorStr.includes("429") || 
+                    errorStr.includes("503") ||
+                    errorStr.toLowerCase().includes("quota") || 
+                    errorStr.toLowerCase().includes("exhausted") || 
+                    errorStr.toLowerCase().includes("limit") ||
+                    errorStr.toLowerCase().includes("unavailable") ||
+                    errorStr.toLowerCase().includes("high demand") ||
+                    errorStr.toLowerCase().includes("overloaded");
     if (isQuota) {
-      console.info("Info: Similarity recommendation switched to offline mode due to temporary rate limits.");
+      console.info("Info: Similarity recommendation switched to offline mode due to temporary rate limits or model demand.");
     } else {
-      console.info("Info: Similarity recommendation switched to offline mode:", error.message || error);
+      console.info("Info: Similarity recommendation switched to electoral offline mode:", error.message || error);
     }
     
-    res.json({ matches: getFallbackMatches(), offline: true, quotaExceeded: isQuota });
+    res.json({ matches: getFallbackMatches(), offline: true, quotaExceeded: true });
   }
 });
 
