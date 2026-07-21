@@ -325,10 +325,13 @@ export default function App() {
   const fetchLogs = async () => {
     try {
       const response = await fetch("/api/audit-logs");
+      if (!response.ok) {
+        throw new Error(`HTTP status ${response.status}`);
+      }
       const data = await response.json();
       setAuditLogs(data.logs || []);
     } catch (e) {
-      console.error(e);
+      console.warn("Audit logs offline:", e);
     }
   };
 
@@ -403,7 +406,7 @@ export default function App() {
       }
       fetchLogs(); // refresh log list
     } catch (e) {
-      console.error(e);
+      console.warn("Similarity search offline:", e);
       setSimilarOffline(true);
     } finally {
       setLoadingSimilar(false);

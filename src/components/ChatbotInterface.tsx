@@ -199,7 +199,7 @@ export default function ChatbotInterface({ selectedNode, role, selectedCaseId, l
       }
 
     } catch (e) {
-      console.error(e);
+      console.warn("Chatbot interface offline fallback triggered:", e);
       setMessages(prev => [...prev, {
         sender: "bot",
         content: "Error matching CCTNS secure API gateways. Running fallback routine: check local connections, confirm target suspect's risk metrics.",
