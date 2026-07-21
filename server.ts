@@ -677,10 +677,16 @@ Structure your output as follows:
       return res.json({ content: fallbackText, audio: null, offline: true });
     }
 
-    const conversationHistory = messages.map((m: any) => ({
+    let conversationHistory = messages.map((m: any) => ({
       role: m.sender === "user" ? "user" as const : "model" as const,
       parts: [{ text: m.content }]
     }));
+
+    // Filter messages to ensure conversationHistory starts with a 'user' message, as required by the Gemini API
+    const firstUserIndex = conversationHistory.findIndex(msg => msg.role === "user");
+    if (firstUserIndex !== -1) {
+      conversationHistory = conversationHistory.slice(firstUserIndex);
+    }
 
     // Generate content using the new SDK standard: ai.models.generateContent
     const response = await ai.models.generateContent({
