@@ -685,11 +685,9 @@ Structure your output as follows:
     // Generate content using the new SDK standard: ai.models.generateContent
     const response = await ai.models.generateContent({
       model: "gemini-3.5-flash",
-      contents: [
-        { role: "system", parts: [{ text: systemInstruction }] },
-        ...conversationHistory
-      ],
+      contents: conversationHistory,
       config: {
+        systemInstruction: systemInstruction,
         temperature: 0.2, // Low temperature for deterministic, factual policing reports
       }
     });
