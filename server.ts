@@ -988,6 +988,105 @@ app.get("/api/docket-info", (req, res) => {
   });
 });
 
+// ----------------- ZOHO CATALYST QUICKML INTEGRATION -----------------
+let cachedAccessToken: string | null = null;
+let tokenExpiryTime: number = 0; // timestamp when token expires
+
+async function getZohoAccessToken(): Promise<string> {
+  const now = Date.now();
+  // If we have a cached token and it has at least 5 minutes before expiry, return it
+  if (cachedAccessToken && now < tokenExpiryTime - 5 * 60 * 1000) {
+    return cachedAccessToken;
+  }
+
+  const refreshToken = process.env.ZOHO_REFRESH_TOKEN;
+  const clientId = process.env.ZOHO_CLIENT_ID;
+  const clientSecret = process.env.ZOHO_CLIENT_SECRET;
+
+  if (!refreshToken || !clientId || !clientSecret) {
+    throw new Error("Missing Zoho OAuth credentials in environment (ZOHO_REFRESH_TOKEN, ZOHO_CLIENT_ID, or ZOHO_CLIENT_SECRET)");
+  }
+
+  const params = new URLSearchParams();
+  params.append("refresh_token", refreshToken);
+  params.append("client_id", clientId);
+  params.append("client_secret", clientSecret);
+  params.append("grant_type", "refresh_token");
+
+  console.log("[Zoho OAuth] Refreshing access token from accounts.zoho.in...");
+  const response = await fetch("https://accounts.zoho.in/oauth/v2/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: params.toString(),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Failed to refresh Zoho OAuth token: ${response.status} ${errText}`);
+  }
+
+  const data = await response.json() as { access_token?: string; expires_in?: number; error?: string };
+  if (data.error) {
+    throw new Error(`Zoho OAuth Error: ${data.error}`);
+  }
+
+  if (!data.access_token) {
+    throw new Error(`Zoho OAuth returned no access_token. Response: ${JSON.stringify(data)}`);
+  }
+
+  cachedAccessToken = data.access_token;
+  const expiresInMs = (data.expires_in || 3600) * 1000;
+  tokenExpiryTime = now + expiresInMs;
+
+  console.log("[Zoho OAuth] Successfully refreshed access token. Expires in:", data.expires_in, "seconds");
+  return cachedAccessToken;
+}
+
+// QuickML Chat Integration endpoint
+app.post("/api/quickml/chat", async (req, res) => {
+  const { question } = req.body;
+
+  if (!question || typeof question !== "string") {
+    return res.status(400).json({ error: "Invalid question. Please provide a non-empty string in the 'question' field." });
+  }
+
+  try {
+    const accessToken = await getZohoAccessToken();
+
+    console.log("[Zoho QuickML] Forwarding question to Catalyst QuickML RAG API...");
+    const quickMlResponse = await fetch("https://api.catalyst.zoho.in/quickml/v1/project/51956000000046001/rag/answer", {
+      method: "POST",
+      headers: {
+        "Authorization": `Zoho-oauthtoken ${accessToken}`,
+        "CATALYST-ORG": "60078355625",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ question })
+    });
+
+    if (!quickMlResponse.ok) {
+      const errText = await quickMlResponse.text();
+      console.error("[Zoho QuickML] RAG API failed:", quickMlResponse.status, errText);
+      return res.status(quickMlResponse.status).json({
+        error: `Catalyst QuickML RAG API returned error: ${quickMlResponse.status}`,
+        details: errText
+      });
+    }
+
+    const data = await quickMlResponse.json();
+    console.log("[Zoho QuickML] Successfully received answer from QuickML.");
+    res.json(data);
+  } catch (error: any) {
+    console.error("[Zoho QuickML] Error in /api/quickml/chat:", error);
+    res.status(500).json({
+      error: "Failed to connect to Zoho Catalyst QuickML service",
+      details: error.message || String(error)
+    });
+  }
+});
+
 // Setup Vite & Static Assets serving
 async function startServer() {
   // Vite middleware for development
