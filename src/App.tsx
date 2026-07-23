@@ -817,7 +817,7 @@ export default function App() {
       <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden min-h-0">
         
         {/* Left/Middle Column (Tab content workspace) */}
-        <section className={`${rightPanelWidth === "hidden" ? "lg:col-span-12" : rightPanelWidth === "narrow" ? "lg:col-span-9" : rightPanelWidth === "wide" ? "lg:col-span-7" : "lg:col-span-8"} flex flex-col p-4 space-y-4 h-full min-h-0 overflow-hidden border-r border-[#333333] bg-[#111111] min-w-0`}>
+        <section className={`${rightPanelWidth === "hidden" ? "lg:col-span-12" : rightPanelWidth === "narrow" ? "lg:col-span-9" : rightPanelWidth === "wide" ? "lg:col-span-7" : "lg:col-span-8"} flex flex-col p-4 space-y-4 h-full min-h-0 overflow-y-auto border-r border-[#333333] bg-[#111111] min-w-0`}>
           
           {/* Tab buttons */}
           <div className="flex gap-1.5 overflow-x-auto pb-1 border-b border-[#333333] no-scrollbar select-none">
@@ -837,7 +837,7 @@ export default function App() {
                   setActiveTab(tab.id as any);
                   fetchLogs();
                 }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono border transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono border transition-all whitespace-nowrap ${
                   activeTab === tab.id 
                     ? "bg-[#1A1A1A] text-[#E53935] border-[#E53935]/40 font-bold" 
                     : "bg-transparent text-[#888888] border-transparent hover:text-[#E0E0E0] hover:border-[#333333]"
@@ -889,85 +889,79 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Main link visualizer space split (Algorithms on Left, D3 Graph on Right) */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1 min-h-0 overflow-hidden">
-                  
-                  {/* Left sub-panel: Graph Solver Algorithms */}
-                  <div className="md:col-span-1 bg-[#1A1A1A] border border-[#333333] rounded p-4 flex flex-col justify-between overflow-y-auto min-h-0 h-full">
-                    <div>
-                      <span className="text-[10px] font-mono font-bold text-[#888888] uppercase tracking-wider block mb-3">Graph Solvers</span>
-                      
-                      <div className="space-y-2 font-mono">
-                        <button 
-                          onClick={() => setActiveAlgo(activeAlgo === "core" ? null : "core")}
-                          className={`w-full text-left p-2.5 rounded border text-xs leading-relaxed transition-all flex flex-col justify-between cursor-pointer ${
-                            activeAlgo === "core" ? "bg-[#E53935]/15 border-[#E53935] text-[#E0E0E0]" : "bg-[#111111] border-[#333333] text-[#888888] hover:border-[#E53935]"
-                          }`}
-                        >
-                          <span className="font-bold block text-[#E0E0E0]">k-Core Decomposition</span>
-                          <span className="text-[9px] text-[#888888] mt-0.5">Strip peripheral nodes to isolate structural gangs.</span>
-                        </button>
+                {/* Main link visualizer space (Full width D3 Graph Canvas) */}
+                <div className="flex-1 w-full h-full min-h-[450px] overflow-hidden">
+                  <NetworkGraph 
+                    nodes={mockPOLEData.nodes as POLEEntity[]}
+                    links={mockPOLEData.links as POLELink[]}
+                    selectedId={selectedNode ? selectedNode.id : null}
+                    onSelectNode={handleSelectNode}
+                    activeAlgo={activeAlgo}
+                    kValue={kValue}
+                    activeTypes={activeTypes}
+                    searchQuery={searchQuery}
+                    role={role}
+                  />
+                </div>
 
-                        {activeAlgo === "core" && (
-                          <div className="p-2 bg-[#111111] rounded border border-[#333333] mt-1 space-y-1">
-                            <div className="flex justify-between text-[10px] text-[#888888] font-mono">
-                              <span>Min Degree:</span>
-                              <span className="text-[#E53935] font-bold">k = {kValue}</span>
-                            </div>
-                            <input 
-                              type="range" 
-                              min="1" 
-                              max="4" 
-                              value={kValue} 
-                              onChange={(e) => setKValue(Number(e.target.value))}
-                              className="w-full accent-[#E53935] cursor-pointer"
-                            />
-                          </div>
-                        )}
+                {/* Horizontal Graph Solvers Bar (placed below the graph canvas) */}
+                <div className="bg-[#1A1A1A] border border-[#333333] rounded px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 font-mono">
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[10px] font-mono font-bold text-[#888888] uppercase tracking-wider">Graph Solvers</span>
+                  </div>
 
-                        <button 
-                          onClick={() => setActiveAlgo(activeAlgo === "between" ? null : "between")}
-                          className={`w-full text-left p-2.5 rounded border text-xs leading-relaxed transition-all flex flex-col justify-between cursor-pointer ${
-                            activeAlgo === "between" ? "bg-[#D69A4E]/15 border-[#D69A4E] text-[#E0E0E0]" : "bg-[#111111] border-[#333333] text-[#888888] hover:border-[#D69A4E]"
-                          }`}
-                        >
-                          <span className="font-bold block text-[#E0E0E0]">Betweenness Centrality</span>
-                          <span className="text-[9px] text-[#888888] mt-0.5">Sized by bridging middlemen nodes.</span>
-                        </button>
-
-                        <button 
-                          onClick={() => setActiveAlgo(activeAlgo === "community" ? null : "community")}
-                          className={`w-full text-left p-2.5 rounded border text-xs leading-relaxed transition-all flex flex-col justify-between cursor-pointer ${
-                            activeAlgo === "community" ? "bg-[#9884AC]/15 border-[#9884AC] text-[#E0E0E0]" : "bg-[#111111] border-[#333333] text-[#888888] hover:border-[#9884AC]"
-                          }`}
-                        >
-                          <span className="font-bold block text-[#E0E0E0]">Louvain Communities</span>
-                          <span className="text-[9px] text-[#888888] mt-0.5">Color code modularity clusters.</span>
-                        </button>
+                  <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
+                    <button 
+                      onClick={() => setActiveAlgo(activeAlgo === "core" ? null : "core")}
+                      className={`px-3 py-1.5 rounded border text-xs leading-tight transition-all cursor-pointer flex items-center gap-2 ${
+                        activeAlgo === "core" ? "bg-[#E53935]/15 border-[#E53935] text-[#E0E0E0]" : "bg-[#111111] border-[#333333] text-[#888888] hover:border-[#E53935]"
+                      }`}
+                    >
+                      <div className="text-left">
+                        <span className="font-bold block text-[#E0E0E0] text-[11px]">k-Core Decomposition</span>
+                        <span className="text-[9px] text-[#888888] block">Strip peripheral nodes</span>
                       </div>
-                    </div>
+                    </button>
 
-                    <div className="pt-4 border-t border-[#333333]">
-                      <span className="text-[9px] font-mono text-[#888888] block">MATCHED POLE COUNT</span>
-                      <div className="text-xl font-mono font-bold text-[#E53935]">{filteredNodesCount} / {mockPOLEData.nodes.length}</div>
-                    </div>
+                    {activeAlgo === "core" && (
+                      <div className="flex items-center gap-2 px-2.5 py-1.5 bg-[#111111] rounded border border-[#333333] shrink-0">
+                        <span className="text-[10px] text-[#888888]">k = <strong className="text-[#E53935]">{kValue}</strong></span>
+                        <input 
+                          type="range" 
+                          min="1" 
+                          max="4" 
+                          value={kValue} 
+                          onChange={(e) => setKValue(Number(e.target.value))}
+                          className="w-16 accent-[#E53935] cursor-pointer"
+                        />
+                      </div>
+                    )}
+
+                    <button 
+                      onClick={() => setActiveAlgo(activeAlgo === "between" ? null : "between")}
+                      className={`px-3 py-1.5 rounded border text-xs leading-tight transition-all cursor-pointer text-left ${
+                        activeAlgo === "between" ? "bg-[#D69A4E]/15 border-[#D69A4E] text-[#E0E0E0]" : "bg-[#111111] border-[#333333] text-[#888888] hover:border-[#D69A4E]"
+                      }`}
+                    >
+                      <span className="font-bold block text-[#E0E0E0] text-[11px]">Betweenness Centrality</span>
+                      <span className="text-[9px] text-[#888888] block">Bridging middlemen</span>
+                    </button>
+
+                    <button 
+                      onClick={() => setActiveAlgo(activeAlgo === "community" ? null : "community")}
+                      className={`px-3 py-1.5 rounded border text-xs leading-tight transition-all cursor-pointer text-left ${
+                        activeAlgo === "community" ? "bg-[#9884AC]/15 border-[#9884AC] text-[#E0E0E0]" : "bg-[#111111] border-[#333333] text-[#888888] hover:border-[#9884AC]"
+                      }`}
+                    >
+                      <span className="font-bold block text-[#E0E0E0] text-[11px]">Louvain Communities</span>
+                      <span className="text-[9px] text-[#888888] block">Modularity clusters</span>
+                    </button>
                   </div>
 
-                  {/* Right sub-panel: D3 Graph Canvas */}
-                  <div className="md:col-span-3 h-full min-h-0">
-                    <NetworkGraph 
-                      nodes={mockPOLEData.nodes as POLEEntity[]}
-                      links={mockPOLEData.links as POLELink[]}
-                      selectedId={selectedNode ? selectedNode.id : null}
-                      onSelectNode={handleSelectNode}
-                      activeAlgo={activeAlgo}
-                      kValue={kValue}
-                      activeTypes={activeTypes}
-                      searchQuery={searchQuery}
-                      role={role}
-                    />
+                  <div className="flex items-center gap-2 pl-3 border-l border-[#333333] shrink-0">
+                    <span className="text-[9px] text-[#888888] uppercase">Matched POLE:</span>
+                    <span className="text-sm font-mono font-bold text-[#E53935]">{filteredNodesCount} / {mockPOLEData.nodes.length}</span>
                   </div>
-
                 </div>
               </div>
             )}
